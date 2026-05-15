@@ -1,0 +1,27 @@
+# Node modules
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Python Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+env/
+venv/
+.env/
+.venv/
+
+# Environment Variables
+.env
+.env.local
+.env.development
+.env.production
+
+# Mac OS
+.DS_Store
+
+# Build folders
+client/dist/
+server/dist/
+build/
