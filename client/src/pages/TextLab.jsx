@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ResultDisplay from "../components/ResultDisplay";
 import TextInput from "../components/TextInput";
 
-const API_BASE = `${import.meta.env.VITE_API_URL}/api`;
+const API_BASE = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api`;
 
 const TextLab = () => {
   const [text, setText] = useState("");

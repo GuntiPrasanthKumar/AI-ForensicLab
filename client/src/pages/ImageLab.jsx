@@ -4,7 +4,7 @@ import { Upload, Image as ImageIcon, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ResultDisplay from "../components/ResultDisplay";
 
-const API_BASE = `${import.meta.env.VITE_API_URL}/api`;
+const API_BASE = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api`;
 
 const ImageLab = () => {
   const [file, setFile] = useState(null);
