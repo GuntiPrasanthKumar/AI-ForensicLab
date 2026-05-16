@@ -16,7 +16,7 @@ const Auth = () => {
     if (user) navigate("/app");
   }, [user, navigate]);
 
-  const API_BASE = "http://localhost:5000/api/auth";
+  const API_BASE = `${import.meta.env.VITE_API_URL}/api`;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

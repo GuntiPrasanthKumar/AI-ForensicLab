@@ -9,7 +9,7 @@ const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const upload = multer({ dest: "uploads/" });
 
-const AI_SERVICE_URL = "http://localhost:8000/api";
+const AI_SERVICE_URL = `${process.env.AI_SERVICE_URL || "http://localhost:8000"}/api`;
 
 // Health Check
 router.get("/health", (req, res) => {
