@@ -14,7 +14,12 @@ const Dashboard = () => {
   const fetchHistory = async () => {
     try {
       const res = await axios.get(`${API_BASE}/history`);
-      setHistory(res.data);
+      if (Array.isArray(res.data)) {
+        setHistory(res.data);
+      } else {
+        setHistory([]);
+        console.error("API did not return an array:", res.data);
+      }
       setServerStatus("online");
     } catch (err) {
       if (err.response?.status === 401) {
