@@ -8,3 +8,5 @@ scipy
 nltk
 opencv-python-headless
 mediapipe
+transformers
+torch
