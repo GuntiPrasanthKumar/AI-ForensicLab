@@ -9,19 +9,16 @@ const { apiLimiter, sanitizeNoSQL } = require("./middleware/security");
 
 const app = express();
 
-// Secure HTTP headers
+// 1. Secure HTTP headers
 app.use(helmet());
 
-// Prevent NoSQL Injection
-app.use(sanitizeNoSQL);
-
-// Apply rate limiter to all API routes
-app.use("/api", apiLimiter);
-
-// Parse Cookies
+// 2. Parse Cookies
 app.use(cookieParser());
 
-// Secure CORS configuration for HttpOnly cookies
+// 3. Body Parser (MUST be before mongo sanitize)
+app.use(express.json());
+
+// 4. Secure CORS configuration for HttpOnly cookies
 const allowedOrigins = [
   "http://localhost:5173", 
   "https://ai-forensic-lab.vercel.app",
@@ -39,7 +36,11 @@ app.use(cors({
   credentials: true, // Crucial for sending/receiving HttpOnly cookies
 }));
 
-app.use(express.json());
+// 5. Prevent NoSQL Injection (MUST be after express.json)
+app.use(sanitizeNoSQL);
+
+// 6. Apply rate limiter to all API routes
+app.use("/api", apiLimiter);
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
