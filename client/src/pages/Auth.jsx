@@ -2,14 +2,18 @@ import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { UserPlus, LogIn, Mail, Lock, User as UserIcon } from "lucide-react";
+import { Turnstile } from "@marsidev/react-turnstile";
 import axios from "axios";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(useLocation().pathname === "/login");
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login, user } = useContext(AuthContext);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  
+  const { fetchUser, user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,15 +25,38 @@ const Auth = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccessMsg("");
     setLoading(true);
+
+    if (!turnstileToken && process.env.NODE_ENV === "production") {
+      setError("Please complete the CAPTCHA");
+      setLoading(false);
+      return;
+    }
 
     try {
       const endpoint = isLogin ? "/login" : "/register";
-      const payload = isLogin ? { email: formData.email, password: formData.password } : formData;
+      const payload = isLogin 
+        ? { email: formData.email, password: formData.password, turnstileToken } 
+        : { ...formData, turnstileToken };
+        
       const res = await axios.post(`${API_BASE}${endpoint}`, payload);
       
-      login(res.data.token, res.data.user);
-      navigate("/app");
+      if (!isLogin) {
+        // Registration success (requires email verification)
+        setSuccessMsg(res.data.message || "Registration successful. Please check your email.");
+      } else {
+        // Login success
+        if (res.data.requiresMfa) {
+          // Redirect to MFA verification (you can implement a modal or new route)
+          // For now we pass tempToken in state
+          navigate("/verify-mfa", { state: { tempToken: res.data.tempToken } });
+        } else {
+          // Success, cookie is set. Fetch user to update context.
+          await fetchUser();
+          navigate("/app");
+        }
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Authentication failed. Please try again.");
     } finally {
@@ -39,7 +66,6 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center pt-20 px-4">
-      {/* Background ambient glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/20 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10">
@@ -91,7 +117,14 @@ const Auth = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium text-gray-300">Password</label>
+              {isLogin && (
+                <Link to="/forgot-password" className="text-sm text-blue-400 hover:text-blue-300">
+                  Forgot Password?
+                </Link>
+              )}
+            </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Lock size={18} className="text-gray-500" />
@@ -107,7 +140,17 @@ const Auth = () => {
             </div>
           </div>
 
+          <div className="flex justify-center">
+            <Turnstile
+              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+              onSuccess={(token) => setTurnstileToken(token)}
+              onError={() => setError("CAPTCHA Error. Please try again.")}
+              options={{ theme: 'dark' }}
+            />
+          </div>
+
           {error && <div className="text-sm text-red-400 bg-red-500/10 p-3 rounded-lg">{error}</div>}
+          {successMsg && <div className="text-sm text-green-400 bg-green-500/10 p-3 rounded-lg">{successMsg}</div>}
 
           <button
             type="submit"
@@ -119,7 +162,7 @@ const Auth = () => {
 
           <p className="text-center text-sm text-gray-400">
             {isLogin ? "Don't have an account? " : "Already have an account? "}
-            <Link to={isLogin ? "/register" : "/login"} onClick={() => setIsLogin(!isLogin)} className="text-blue-400 hover:text-blue-300 font-medium">
+            <Link to={isLogin ? "/register" : "/login"} onClick={() => { setIsLogin(!isLogin); setSuccessMsg(""); setError(""); }} className="text-blue-400 hover:text-blue-300 font-medium">
               {isLogin ? "Sign Up" : "Sign In"}
             </Link>
           </p>

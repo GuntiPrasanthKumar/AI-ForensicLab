@@ -1,0 +1,16 @@
+const mongoose = require("mongoose");
+
+const AuditLogSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  email: { type: String }, // Useful if login fails and no user exists
+  action: { 
+    type: String, 
+    enum: ['LOGIN_SUCCESS', 'LOGIN_FAILED', 'ACCOUNT_LOCKED', 'PASSWORD_RESET', 'MFA_ENABLED'],
+    required: true
+  },
+  ipAddress: { type: String },
+  userAgent: { type: String },
+  createdAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model("AuditLog", AuditLogSchema);
