@@ -2,8 +2,6 @@ const nodemailer = require("nodemailer");
 
 function isEmailConfigured() {
   if (process.env.RESEND_API_KEY) return true;
-  // Gmail SMTP should only be used for local/dev where outbound SMTP is allowed.
-  if (process.env.NODE_ENV === "production") return false;
   return Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASS);
 }
 
@@ -49,8 +47,9 @@ async function sendViaResend({ email, subject, message, html }) {
 
 async function sendViaGmail({ email, subject, message, html }) {
   const transporter = nodemailer.createTransport({
-    service: "gmail",
-    // Keep signup responsive: fail quickly when SMTP is blocked.
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 10000,
