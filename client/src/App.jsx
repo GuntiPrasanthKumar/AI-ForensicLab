@@ -14,6 +14,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyMfa from "./pages/VerifyMfa";
+import VerifyEmailOtp from "./pages/VerifyEmailOtp";
 import MfaSetup from "./pages/MfaSetup";
 
 const PrivateRoute = ({ children }) => {
@@ -37,6 +38,7 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
               <Route path="/verify-mfa" element={<VerifyMfa />} />
+              <Route path="/verify-email-otp" element={<VerifyEmailOtp />} />
               <Route path="/about" element={<About />} />
               <Route 
                 path="/app" 

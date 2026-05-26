@@ -9,6 +9,8 @@ const AuditLog = require("../models/AuditLog");
 const { authLimiter } = require("../middleware/security");
 const authMiddleware = require("../middleware/authMiddleware");
 const sendEmail = require("../utils/email");
+const { isEmailConfigured, buildOtpEmailHtml } = require("../utils/email");
+const { generateOtp, setEmailOtpFields, clearEmailOtpFields, isOtpValid } = require("../utils/otp");
 const verifyTurnstile = require("../utils/turnstile");
 
 const router = express.Router();
@@ -27,45 +29,139 @@ const sendTokenCookie = (res, user) => {
   });
 };
 
+async function sendVerificationOtp(user, otp) {
+  const message = `Your AI Forensic Lab verification code is: ${otp}\n\nThis code expires in 10 minutes.`;
+  const html = buildOtpEmailHtml(otp, user.name);
+  await sendEmail({
+    email: user.email,
+    subject: "Your verification code — AI Forensic Lab",
+    message,
+    html,
+  });
+}
+
 // @route   POST /api/auth/register
-// @desc    Register user & send verification email
+// @desc    Register user & send email OTP
 router.post("/register", authLimiter, async (req, res) => {
   const { name, email, password, turnstileToken } = req.body;
   try {
-    // 1. Verify CAPTCHA
+    if (!isEmailConfigured()) {
+      return res.status(503).json({
+        message: "Email service is not configured on the server. Contact the administrator.",
+      });
+    }
+
     const isValidCaptcha = await verifyTurnstile(turnstileToken);
     if (!isValidCaptcha && process.env.NODE_ENV === "production") {
       return res.status(400).json({ message: "CAPTCHA verification failed" });
     }
 
-    // 2. Check if user exists
-    let user = await User.findOne({ email });
-    if (user) return res.status(400).json({ message: "Registration successful. Please check your email." }); // Generic response
-
-    const verificationToken = crypto.randomBytes(20).toString("hex");
-    user = new User({ 
-      name, 
-      email, 
-      password,
-      verificationToken,
-      isVerified: true // Auto-verify because Render Free Tier blocks SMTP
-    });
-    await user.save();
-
-    // 4. Send Email
-    const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`;
-    const message = `Please click the link below to verify your email address:\n\n${verifyUrl}`;
-    
-    try {
-      await sendEmail({ email: user.email, subject: "Email Verification", message });
-    } catch (error) {
-      console.error("Email could not be sent", error);
-      // We don't fail the registration, but we log the error
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ message: "An account with this email already exists." });
     }
 
-    res.status(201).json({ message: "Registration successful. Please check your email to verify your account." });
+    const otp = generateOtp();
+    const user = new User({ name, email, password, isVerified: false });
+    setEmailOtpFields(user, otp);
+    await user.save();
+
+    try {
+      await sendVerificationOtp(user, otp);
+    } catch (error) {
+      await User.findByIdAndDelete(user._id);
+      console.error("REGISTER EMAIL ERROR:", error.message);
+      return res.status(503).json({
+        message: "Could not send verification email. Check your email address or try again later.",
+        details: process.env.NODE_ENV === "development" ? error.message : undefined,
+      });
+    }
+
+    res.status(201).json({
+      message: "Verification code sent to your email.",
+      requiresEmailVerification: true,
+      email: user.email,
+    });
   } catch (err) {
     console.error("REGISTER ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// @route   POST /api/auth/verify-otp
+// @desc    Verify email with 6-digit OTP
+router.post("/verify-otp", authLimiter, async (req, res) => {
+  const { email, otp } = req.body;
+  try {
+    if (!email || !otp) {
+      return res.status(400).json({ message: "Email and verification code are required." });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid verification code." });
+    }
+
+    if (user.isVerified) {
+      sendTokenCookie(res, user);
+      return res.json({
+        message: "Email already verified.",
+        user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      });
+    }
+
+    if (!isOtpValid(user, String(otp).trim())) {
+      return res.status(400).json({ message: "Invalid or expired verification code." });
+    }
+
+    user.isVerified = true;
+    clearEmailOtpFields(user);
+    user.verificationToken = undefined;
+    await user.save();
+
+    await AuditLog.create({ userId: user.id, action: "EMAIL_VERIFIED", ipAddress: req.ip });
+    sendTokenCookie(res, user);
+    res.json({
+      message: "Email verified successfully.",
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+    });
+  } catch (err) {
+    console.error("VERIFY OTP ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// @route   POST /api/auth/resend-otp
+// @desc    Resend email verification OTP
+router.post("/resend-otp", authLimiter, async (req, res) => {
+  const { email } = req.body;
+  try {
+    if (!isEmailConfigured()) {
+      return res.status(503).json({ message: "Email service is not configured on the server." });
+    }
+
+    const user = await User.findOne({ email });
+    const genericMsg = "If an unverified account exists, a new code has been sent.";
+    if (!user || user.isVerified) {
+      return res.json({ message: genericMsg });
+    }
+
+    const otp = generateOtp();
+    setEmailOtpFields(user, otp);
+    await user.save();
+
+    try {
+      await sendVerificationOtp(user, otp);
+    } catch (error) {
+      console.error("RESEND OTP EMAIL ERROR:", error.message);
+      return res.status(503).json({
+        message: "Could not send verification email. Please try again later.",
+        details: process.env.NODE_ENV === "development" ? error.message : undefined,
+      });
+    }
+
+    res.json({ message: genericMsg, email: user.email });
+  } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -74,6 +170,12 @@ router.post("/register", authLimiter, async (req, res) => {
 // @desc    Test email delivery directly from Render
 router.get("/test-email", async (req, res) => {
   try {
+    if (!isEmailConfigured()) {
+      return res.status(503).json({
+        message: "Email not configured. Set RESEND_API_KEY or EMAIL_USER + EMAIL_PASS.",
+      });
+    }
+
     const { email } = req.query;
     if (!email) return res.status(400).json({ message: "Provide ?email=your_email@gmail.com" });
     
@@ -151,12 +253,13 @@ router.post("/login", authLimiter, async (req, res) => {
       return res.status(400).json({ message: invalidCredentialsMsg });
     }
 
-    // Check Verification (Bypassed due to Render SMTP block)
-    /*
     if (!user.isVerified) {
-      return res.status(403).json({ message: "Please verify your email address to log in" });
+      return res.status(403).json({
+        message: "Please verify your email with the 6-digit code we sent you.",
+        requiresEmailVerification: true,
+        email: user.email,
+      });
     }
-    */
 
     // Reset attempts on success
     user.loginAttempts = 0;

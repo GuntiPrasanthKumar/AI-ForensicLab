@@ -43,22 +43,26 @@ const Auth = () => {
       const res = await axios.post(`${API_BASE}${endpoint}`, payload);
       
       if (!isLogin) {
-        // Registration success (requires email verification)
-        setSuccessMsg(res.data.message || "Registration successful. Please check your email.");
+        if (res.data.requiresEmailVerification) {
+          navigate("/verify-email-otp", { state: { email: res.data.email || formData.email } });
+        } else {
+          setSuccessMsg(res.data.message || "Registration successful.");
+        }
       } else {
-        // Login success
         if (res.data.requiresMfa) {
-          // Redirect to MFA verification (you can implement a modal or new route)
-          // For now we pass tempToken in state
           navigate("/verify-mfa", { state: { tempToken: res.data.tempToken } });
         } else {
-          // Success, cookie is set. Fetch user to update context.
           await fetchUser();
           navigate("/app");
         }
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Authentication failed. Please try again.");
+      const data = err.response?.data;
+      if (data?.requiresEmailVerification) {
+        navigate("/verify-email-otp", { state: { email: data.email || formData.email } });
+        return;
+      }
+      setError(data?.message || "Authentication failed. Please try again.");
     } finally {
       setLoading(false);
     }
