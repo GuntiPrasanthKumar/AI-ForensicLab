@@ -319,4 +319,16 @@ router.post("/mfa/verify", async (req, res) => {
   }
 });
 
+// @route   POST /api/auth/logout
+// @desc    Logout user and clear cookie
+router.post("/logout", (req, res) => {
+  res.cookie("token", "", {
+    httpOnly: true,
+    expires: new Date(0),
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  });
+  res.json({ message: "Logged out successfully" });
+});
+
 module.exports = router;
