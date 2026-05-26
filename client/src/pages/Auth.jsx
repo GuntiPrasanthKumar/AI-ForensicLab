@@ -28,7 +28,7 @@ const Auth = () => {
     setSuccessMsg("");
     setLoading(true);
 
-    if (!turnstileToken && process.env.NODE_ENV === "production") {
+    if (!turnstileToken && import.meta.env.PROD) {
       setError("Please complete the CAPTCHA");
       setLoading(false);
       return;
@@ -40,7 +40,9 @@ const Auth = () => {
         ? { email: formData.email, password: formData.password, turnstileToken } 
         : { ...formData, turnstileToken };
         
-      const res = await axios.post(`${API_BASE}${endpoint}`, payload);
+      const res = await axios.post(`${API_BASE}${endpoint}`, payload, {
+        withCredentials: true,
+      });
       
       if (!isLogin) {
         if (res.data.requiresEmailVerification) {
@@ -60,6 +62,12 @@ const Auth = () => {
       const data = err.response?.data;
       if (data?.requiresEmailVerification) {
         navigate("/verify-email-otp", { state: { email: data.email || formData.email } });
+        return;
+      }
+      if (!err.response) {
+        setError(
+          "Cannot reach the server. Check your connection, or wait a moment if the API is waking up (Render free tier), then try again."
+        );
         return;
       }
       setError(data?.message || "Authentication failed. Please try again.");
