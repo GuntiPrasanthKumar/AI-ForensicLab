@@ -69,16 +69,26 @@ router.post("/detect", authMiddleware, upload.single("file"), async (req, res) =
     if (tempPath && fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
     
     let errorMessage = "Analysis failed";
+    let errorDetails = null;
+
     if (err.code === "ECONNREFUSED") {
-      errorMessage = "AI Service (Python) is not running on port 8000.";
+      errorMessage = "AI Service (Python) is not running or unreachable.";
     } else if (err.code === "ECONNABORTED") {
       errorMessage = "AI Service took too long to respond. Try a smaller image.";
     } else if (err.response) {
-      errorMessage = `AI Error: ${err.response.data?.message || "Internal Service Error"}`;
+      // If Python service crashed, Render returns an HTML page for 502/504
+      if (typeof err.response.data === 'string' && err.response.data.includes('<html')) {
+        errorMessage = `AI Error: Render Gateway Error (Status ${err.response.status}). The AI service might be out of memory or sleeping.`;
+      } else {
+        errorMessage = `AI Error: ${err.response.data?.message || err.response.data?.error || "Internal Service Error"}`;
+      }
+      errorDetails = err.response.data;
+    } else {
+      errorMessage = `System Error: ${err.message}`;
     }
 
-    console.error("DETECTION ERROR:", errorMessage);
-    res.status(500).json({ message: errorMessage });
+    console.error("DETECTION ERROR:", errorMessage, err.message);
+    res.status(500).json({ message: errorMessage, details: errorDetails });
   }
 });
 
