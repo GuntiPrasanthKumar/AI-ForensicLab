@@ -2,6 +2,8 @@ const nodemailer = require("nodemailer");
 
 function isEmailConfigured() {
   if (process.env.RESEND_API_KEY) return true;
+  // Gmail SMTP should only be used for local/dev where outbound SMTP is allowed.
+  if (process.env.NODE_ENV === "production") return false;
   return Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASS);
 }
 
@@ -19,6 +21,8 @@ function buildOtpEmailHtml(otp, name) {
 
 async function sendViaResend({ email, subject, message, html }) {
   const from = process.env.EMAIL_FROM || "AI Forensic Lab <onboarding@resend.dev>";
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -32,7 +36,9 @@ async function sendViaResend({ email, subject, message, html }) {
       text: message,
       html: html || undefined,
     }),
+    signal: controller.signal,
   });
+  clearTimeout(timeout);
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
@@ -44,13 +50,18 @@ async function sendViaResend({ email, subject, message, html }) {
 async function sendViaGmail({ email, subject, message, html }) {
   const transporter = nodemailer.createTransport({
     service: "gmail",
+    // Keep signup responsive: fail quickly when SMTP is blocked.
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
   });
 
-  await transporter.verify();
+  // verify() can hang in some blocked network environments; sendMail should be enough.
+  // If you want strict validation, increase timeouts and keep this.
 
   return transporter.sendMail({
     from: `"AI Forensic Lab" <${process.env.EMAIL_USER}>`,
@@ -58,13 +69,16 @@ async function sendViaGmail({ email, subject, message, html }) {
     subject,
     text: message,
     html,
+    timeout: 12000,
   });
 }
 
 const sendEmail = async (options) => {
   if (!isEmailConfigured()) {
     throw new Error(
-      "Email is not configured. Set RESEND_API_KEY (recommended for production) or EMAIL_USER + EMAIL_PASS (Gmail app password for local dev)."
+      process.env.NODE_ENV === "production"
+        ? "In production, set RESEND_API_KEY (Render blocks Gmail SMTP)."
+        : "Email is not configured. Set EMAIL_USER + EMAIL_PASS (Gmail app password) for local dev."
     );
   }
 
