@@ -142,6 +142,7 @@ const Auth = () => {
 
           <div className="flex justify-center">
             <Turnstile
+              key={isLogin ? 'login' : 'register'}
               siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
               onSuccess={(token) => setTurnstileToken(token)}
               onError={() => setError("CAPTCHA Error. Please try again.")}
@@ -162,7 +163,7 @@ const Auth = () => {
 
           <p className="text-center text-sm text-gray-400">
             {isLogin ? "Don't have an account? " : "Already have an account? "}
-            <Link to={isLogin ? "/register" : "/login"} onClick={() => { setIsLogin(!isLogin); setSuccessMsg(""); setError(""); }} className="text-blue-400 hover:text-blue-300 font-medium">
+            <Link to={isLogin ? "/register" : "/login"} onClick={() => { setIsLogin(!isLogin); setSuccessMsg(""); setError(""); setTurnstileToken(""); }} className="text-blue-400 hover:text-blue-300 font-medium">
               {isLogin ? "Sign Up" : "Sign In"}
             </Link>
           </p>
