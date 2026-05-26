@@ -46,6 +46,31 @@ async function sendViaResend({ email, subject, message, html }) {
 }
 
 async function sendViaGmail({ email, subject, message, html }) {
+  // If in production on Render, SMTP is blocked. Route through Vercel serverless proxy.
+  if (process.env.NODE_ENV === "production") {
+    const proxyUrl = "https://ai-forensic-lab.vercel.app/api/sendEmail";
+    try {
+      const response = await fetch(proxyUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: email,
+          subject,
+          message,
+          html,
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Proxy error");
+      return data;
+    } catch (err) {
+      throw new Error(`Vercel Email Proxy failed: ${err.message}`);
+    }
+  }
+
+  // Local development: use standard SMTP
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
@@ -58,9 +83,6 @@ async function sendViaGmail({ email, subject, message, html }) {
       pass: process.env.EMAIL_PASS,
     },
   });
-
-  // verify() can hang in some blocked network environments; sendMail should be enough.
-  // If you want strict validation, increase timeouts and keep this.
 
   return transporter.sendMail({
     from: `"AI Forensic Lab" <${process.env.EMAIL_USER}>`,

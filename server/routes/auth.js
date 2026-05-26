@@ -74,16 +74,11 @@ router.post("/register", authLimiter, async (req, res) => {
         email: user.email,
       });
     } catch (error) {
+      await User.findByIdAndDelete(user._id);
       console.error("REGISTER EMAIL ERROR:", error.message);
-      // Fallback for Render Free Tier which blocks SMTP: Auto-verify the user
-      user.isVerified = true;
-      clearEmailOtpFields(user);
-      await user.save();
-      
-      res.status(201).json({
-        message: "Registration successful. (Email OTP bypassed due to Render Free Tier limitations)",
-        requiresEmailVerification: false,
-        email: user.email,
+      return res.status(503).json({
+        message: "Could not send verification email. Check your email address or try again later.",
+        details: process.env.NODE_ENV === "development" ? error.message : undefined,
       });
     }
   } catch (err) {
