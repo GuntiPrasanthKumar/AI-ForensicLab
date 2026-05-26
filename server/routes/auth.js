@@ -63,10 +63,33 @@ router.post("/register", authLimiter, async (req, res) => {
       // We don't fail the registration, but we log the error
     }
 
-    res.json({ message: "Registration successful. Please check your email to verify your account." });
+    res.status(201).json({ message: "Registration successful. Please check your email to verify your account." });
   } catch (err) {
     console.error("REGISTER ERROR:", err);
     res.status(500).json({ message: "Server error" });
+  }
+});
+
+// @route   GET /api/auth/test-email
+// @desc    Test email delivery directly from Render
+router.get("/test-email", async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) return res.status(400).json({ message: "Provide ?email=your_email@gmail.com" });
+    
+    await sendEmail({ 
+      email: email, 
+      subject: "Render Email Test", 
+      message: "If you get this, Render is successfully sending emails!" 
+    });
+    
+    res.json({ message: "Email sent successfully from Render!" });
+  } catch (error) {
+    res.status(500).json({ 
+      message: "Failed to send email from Render", 
+      error: error.message,
+      stack: error.stack
+    });
   }
 });
 
