@@ -3,7 +3,11 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
+const dns = require("node:dns");
 require("dotenv").config();
+
+// Force IPv4 resolution to prevent Render ENETUNREACH IPv6 errors with Nodemailer
+dns.setDefaultResultOrder("ipv4first");
 
 const { apiLimiter, sanitizeNoSQL } = require("./middleware/security");
 
