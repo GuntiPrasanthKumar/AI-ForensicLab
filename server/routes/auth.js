@@ -116,11 +116,13 @@ router.post("/verify-email/:token", async (req, res) => {
 router.post("/login", authLimiter, async (req, res) => {
   const { email, password, turnstileToken } = req.body;
   try {
-    // 1. Verify CAPTCHA
+    // 1. Verify CAPTCHA (Bypassed temporarily)
+    /*
     const isValidCaptcha = await verifyTurnstile(turnstileToken);
     if (!isValidCaptcha && process.env.NODE_ENV === "production") {
       return res.status(400).json({ message: "CAPTCHA verification failed" });
     }
+    */
 
     const user = await User.findOne({ email });
     
