@@ -42,13 +42,13 @@ router.post("/register", authLimiter, async (req, res) => {
     let user = await User.findOne({ email });
     if (user) return res.status(400).json({ message: "Registration successful. Please check your email." }); // Generic response
 
-    // 3. Create User & Verification Token
     const verificationToken = crypto.randomBytes(20).toString("hex");
     user = new User({ 
       name, 
       email, 
       password,
-      verificationToken 
+      verificationToken,
+      isVerified: true // Auto-verify because Render Free Tier blocks SMTP
     });
     await user.save();
 
@@ -149,10 +149,12 @@ router.post("/login", authLimiter, async (req, res) => {
       return res.status(400).json({ message: invalidCredentialsMsg });
     }
 
-    // Check Verification
+    // Check Verification (Bypassed due to Render SMTP block)
+    /*
     if (!user.isVerified) {
       return res.status(403).json({ message: "Please verify your email address to log in" });
     }
+    */
 
     // Reset attempts on success
     user.loginAttempts = 0;
