@@ -51,10 +51,13 @@ router.post("/register", authLimiter, async (req, res) => {
       });
     }
 
+    // Verify CAPTCHA (Bypassed temporarily)
+    /*
     const isValidCaptcha = await verifyTurnstile(turnstileToken);
     if (!isValidCaptcha && process.env.NODE_ENV === "production") {
       return res.status(400).json({ message: "CAPTCHA verification failed" });
     }
+    */
 
     const existing = await User.findOne({ email });
     if (existing) {
