@@ -163,10 +163,10 @@ const Auth = () => {
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] disabled:opacity-50"
+            disabled={loading || !turnstileToken}
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Processing..." : isLogin ? "Sign In" : "Create Account"}
+            {loading ? "Processing..." : !turnstileToken ? "Waiting for CAPTCHA..." : isLogin ? "Sign In" : "Create Account"}
           </button>
 
           <p className="text-center text-sm text-gray-400">

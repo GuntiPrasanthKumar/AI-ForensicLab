@@ -49,9 +49,12 @@ router.post("/register", authLimiter, async (req, res) => {
       });
     }
 
+    if (!turnstileToken) {
+      return res.status(400).json({ message: "Please wait for CAPTCHA to verify before submitting." });
+    }
     const isValidCaptcha = await verifyTurnstile(turnstileToken);
     if (!isValidCaptcha && process.env.NODE_ENV === "production") {
-      return res.status(400).json({ message: "CAPTCHA verification failed" });
+      return res.status(400).json({ message: "CAPTCHA verification failed. Site Key mismatch." });
     }
 
     const existing = await User.findOne({ email });
@@ -216,9 +219,12 @@ router.post("/login", authLimiter, async (req, res) => {
   const { email, password, turnstileToken } = req.body;
   try {
     // 1. Verify CAPTCHA
+    if (!turnstileToken) {
+      return res.status(400).json({ message: "Please wait for CAPTCHA to verify before submitting." });
+    }
     const isValidCaptcha = await verifyTurnstile(turnstileToken);
     if (!isValidCaptcha && process.env.NODE_ENV === "production") {
-      return res.status(400).json({ message: "CAPTCHA verification failed" });
+      return res.status(400).json({ message: "CAPTCHA verification failed. Site Key mismatch." });
     }
 
     const user = await User.findOne({ email });
