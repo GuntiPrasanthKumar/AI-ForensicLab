@@ -13,9 +13,7 @@ import About from "./pages/About";
 import VerifyEmail from "./pages/VerifyEmail";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import VerifyMfa from "./pages/VerifyMfa";
 import VerifyEmailOtp from "./pages/VerifyEmailOtp";
-import MfaSetup from "./pages/MfaSetup";
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
@@ -37,7 +35,6 @@ function App() {
               <Route path="/verify-email/:token" element={<VerifyEmail />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
-              <Route path="/verify-mfa" element={<VerifyMfa />} />
               <Route path="/verify-email-otp" element={<VerifyEmailOtp />} />
               <Route path="/about" element={<About />} />
               <Route 
@@ -48,11 +45,6 @@ function App() {
                   </PrivateRoute>
                 } 
               />
-              <Route path="/app/mfa-setup" element={
-                <PrivateRoute>
-                  <MfaSetup />
-                </PrivateRoute>
-              } />
               <Route path="/app/image" element={
                 <PrivateRoute>
                   <ImageLab />

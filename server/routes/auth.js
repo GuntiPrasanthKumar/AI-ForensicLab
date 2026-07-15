@@ -2,8 +2,6 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const speakeasy = require("speakeasy");
-const qrcode = require("qrcode");
 const User = require("../models/User");
 const AuditLog = require("../models/AuditLog");
 const { authLimiter } = require("../middleware/security");
@@ -51,13 +49,10 @@ router.post("/register", authLimiter, async (req, res) => {
       });
     }
 
-    // Verify CAPTCHA (Bypassed temporarily)
-    /*
     const isValidCaptcha = await verifyTurnstile(turnstileToken);
     if (!isValidCaptcha && process.env.NODE_ENV === "production") {
       return res.status(400).json({ message: "CAPTCHA verification failed" });
     }
-    */
 
     const existing = await User.findOne({ email });
     if (existing) {
@@ -220,13 +215,11 @@ router.post("/verify-email/:token", async (req, res) => {
 router.post("/login", authLimiter, async (req, res) => {
   const { email, password, turnstileToken } = req.body;
   try {
-    // 1. Verify CAPTCHA (Bypassed temporarily)
-    /*
+    // 1. Verify CAPTCHA
     const isValidCaptcha = await verifyTurnstile(turnstileToken);
     if (!isValidCaptcha && process.env.NODE_ENV === "production") {
       return res.status(400).json({ message: "CAPTCHA verification failed" });
     }
-    */
 
     const user = await User.findOne({ email });
     
@@ -268,12 +261,7 @@ router.post("/login", authLimiter, async (req, res) => {
     user.lockUntil = undefined;
     await user.save();
 
-    // Check MFA
-    if (user.mfaEnabled) {
-      // Require OTP - send a temporary token that only allows hitting /mfa/verify
-      const tempToken = jwt.sign({ tempUserId: user.id }, JWT_SECRET, { expiresIn: "5m" });
-      return res.json({ requiresMfa: true, tempToken });
-    }
+    // MFA removed
 
     await AuditLog.create({ userId: user.id, action: 'LOGIN_SUCCESS', ipAddress: req.ip });
     sendTokenCookie(res, user);
@@ -361,71 +349,6 @@ router.post("/reset-password/:token", async (req, res) => {
   }
 });
 
-// @route   POST /api/auth/mfa/setup
-// @desc    Generate MFA QR Code
-router.post("/mfa/setup", authMiddleware, async (req, res) => {
-  try {
-    const secret = speakeasy.generateSecret({ name: `AI Forensic Lab (${req.user.email})` });
-    
-    const user = await User.findById(req.user.userId);
-    user.mfaSecret = secret.base32;
-    await user.save();
-
-    qrcode.toDataURL(secret.otpauth_url, (err, data_url) => {
-      if (err) return res.status(500).json({ message: "Error generating QR code" });
-      res.json({ qrCodeUrl: data_url, secret: secret.base32 });
-    });
-  } catch (err) {
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// @route   POST /api/auth/mfa/verify
-// @desc    Verify MFA token (either during setup or login)
-router.post("/mfa/verify", async (req, res) => {
-  const { token, isSetup, tempToken } = req.body; // isSetup = true if verifying during setup from Dashboard
-  
-  try {
-    let user;
-    if (isSetup) {
-      // Setup phase - user must be fully logged in (needs authMiddleware, but let's handle manually or via token param)
-      // Since it's easier, we'll extract from HttpCookie
-      const cookieToken = req.cookies.token;
-      if (!cookieToken) return res.status(401).json({ message: "Unauthorized" });
-      const decoded = jwt.verify(cookieToken, JWT_SECRET);
-      user = await User.findById(decoded.userId);
-    } else {
-      // Login phase - user has a tempToken
-      if (!tempToken) return res.status(401).json({ message: "Unauthorized" });
-      const decoded = jwt.verify(tempToken, JWT_SECRET);
-      user = await User.findById(decoded.tempUserId);
-    }
-
-    if (!user) return res.status(400).json({ message: "User not found" });
-
-    const verified = speakeasy.totp.verify({
-      secret: user.mfaSecret,
-      encoding: 'base32',
-      token: token
-    });
-
-    if (!verified) return res.status(400).json({ message: "Invalid MFA token" });
-
-    if (isSetup) {
-      user.mfaEnabled = true;
-      await user.save();
-      await AuditLog.create({ userId: user.id, action: 'MFA_ENABLED', ipAddress: req.ip });
-      res.json({ message: "MFA Setup successful" });
-    } else {
-      // Complete login
-      sendTokenCookie(res, user);
-      res.json({ user: { id: user.id, name: user.name, email: user.email, role: user.role } });
-    }
-  } catch (err) {
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
 // @route   POST /api/auth/logout
 // @desc    Logout user and clear cookie
 router.post("/logout", (req, res) => {
@@ -436,6 +359,24 @@ router.post("/logout", (req, res) => {
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   });
   res.json({ message: "Logged out successfully" });
+});
+
+// @route   DELETE /api/auth/delete
+// @desc    Delete user account
+router.delete("/delete", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    await User.findByIdAndDelete(req.user.userId);
+    await Result.deleteMany({ user: req.user.userId });
+    await AuditLog.deleteMany({ userId: req.user.userId });
+
+    res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "none" });
+    res.json({ message: "User deleted" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 module.exports = router;

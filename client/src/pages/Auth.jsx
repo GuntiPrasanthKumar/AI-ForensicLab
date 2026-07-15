@@ -51,12 +51,8 @@ const Auth = () => {
           setSuccessMsg(res.data.message || "Registration successful.");
         }
       } else {
-        if (res.data.requiresMfa) {
-          navigate("/verify-mfa", { state: { tempToken: res.data.tempToken } });
-        } else {
-          await fetchUser();
-          navigate("/app");
-        }
+        await fetchUser();
+        navigate("/app");
       }
     } catch (err) {
       const data = err.response?.data;

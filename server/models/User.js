@@ -22,10 +22,6 @@ const UserSchema = new mongoose.Schema({
   loginAttempts: { type: Number, required: true, default: 0 },
   lockUntil: { type: Date },
   
-  // MFA
-  mfaEnabled: { type: Boolean, default: false },
-  mfaSecret: { type: String },
-  
   // Session Invalidation
   tokenVersion: { type: Number, default: 0 }
 });
