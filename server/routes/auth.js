@@ -49,6 +49,8 @@ router.post("/register", authLimiter, async (req, res) => {
       });
     }
 
+    // CAPTCHA temporarily disabled
+    /*
     if (!turnstileToken) {
       return res.status(400).json({ message: "Please wait for CAPTCHA to verify before submitting." });
     }
@@ -56,6 +58,7 @@ router.post("/register", authLimiter, async (req, res) => {
     if (!isValidCaptcha && process.env.NODE_ENV === "production") {
       return res.status(400).json({ message: "CAPTCHA verification failed. Site Key mismatch." });
     }
+    */
 
     const existing = await User.findOne({ email });
     if (existing) {
@@ -218,7 +221,8 @@ router.post("/verify-email/:token", async (req, res) => {
 router.post("/login", authLimiter, async (req, res) => {
   const { email, password, turnstileToken } = req.body;
   try {
-    // 1. Verify CAPTCHA
+    // 1. Verify CAPTCHA (temporarily disabled)
+    /*
     if (!turnstileToken) {
       return res.status(400).json({ message: "Please wait for CAPTCHA to verify before submitting." });
     }
@@ -226,6 +230,7 @@ router.post("/login", authLimiter, async (req, res) => {
     if (!isValidCaptcha && process.env.NODE_ENV === "production") {
       return res.status(400).json({ message: "CAPTCHA verification failed. Site Key mismatch." });
     }
+    */
 
     const user = await User.findOne({ email });
     

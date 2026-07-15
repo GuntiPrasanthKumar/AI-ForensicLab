@@ -148,25 +148,15 @@ const Auth = () => {
             </div>
           </div>
 
-          <div className="flex justify-center">
-            <Turnstile
-              key={isLogin ? 'login' : 'register'}
-              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
-              onSuccess={(token) => setTurnstileToken(token)}
-              onError={() => setError("CAPTCHA Error. Please try again.")}
-              options={{ theme: 'dark' }}
-            />
-          </div>
-
           {error && <div className="text-sm text-red-400 bg-red-500/10 p-3 rounded-lg">{error}</div>}
           {successMsg && <div className="text-sm text-green-400 bg-green-500/10 p-3 rounded-lg">{successMsg}</div>}
 
           <button
             type="submit"
-            disabled={loading || !turnstileToken}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading}
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] disabled:opacity-50"
           >
-            {loading ? "Processing..." : !turnstileToken ? "Waiting for CAPTCHA..." : isLogin ? "Sign In" : "Create Account"}
+            {loading ? "Processing..." : isLogin ? "Sign In" : "Create Account"}
           </button>
 
           <p className="text-center text-sm text-gray-400">
