@@ -80,7 +80,8 @@ router.post("/detect", authMiddleware, upload.single("file"), async (req, res) =
       if (typeof err.response.data === 'string' && err.response.data.includes('<html')) {
         errorMessage = `AI Error: Render Gateway Error (Status ${err.response.status}). The AI service might be out of memory or sleeping.`;
       } else {
-        errorMessage = `AI Error: ${err.response.data?.message || err.response.data?.error || "Internal Service Error"}`;
+        const detail = err.response.data?.message || err.response.data?.error || err.response.data?.detail || JSON.stringify(err.response.data);
+        errorMessage = `AI Error: ${detail}`;
       }
       errorDetails = err.response.data;
     } else {
