@@ -10,10 +10,8 @@ import ImageLab from "./pages/ImageLab";
 import VideoLab from "./pages/VideoLab";
 import TextLab from "./pages/TextLab";
 import About from "./pages/About";
-import VerifyEmail from "./pages/VerifyEmail";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import VerifyEmailOtp from "./pages/VerifyEmailOtp";
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
@@ -32,10 +30,8 @@ function App() {
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Auth />} />
               <Route path="/register" element={<Auth />} />
-              <Route path="/verify-email/:token" element={<VerifyEmail />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
-              <Route path="/verify-email-otp" element={<VerifyEmailOtp />} />
               <Route path="/about" element={<About />} />
               <Route 
                 path="/app" 

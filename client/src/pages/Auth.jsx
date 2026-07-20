@@ -44,22 +44,10 @@ const Auth = () => {
         withCredentials: true,
       });
       
-      if (!isLogin) {
-        if (res.data.requiresEmailVerification) {
-          navigate("/verify-email-otp", { state: { email: res.data.email || formData.email } });
-        } else {
-          setSuccessMsg(res.data.message || "Registration successful.");
-        }
-      } else {
-        await fetchUser();
-        navigate("/app");
-      }
+      await fetchUser();
+      navigate("/app");
     } catch (err) {
       const data = err.response?.data;
-      if (data?.requiresEmailVerification) {
-        navigate("/verify-email-otp", { state: { email: data.email || formData.email } });
-        return;
-      }
       if (!err.response) {
         setError(
           "Cannot reach the server. Check your connection, or wait a moment if the API is waking up (Render free tier), then try again."

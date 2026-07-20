@@ -39,16 +39,10 @@ async function sendVerificationOtp(user, otp) {
 }
 
 // @route   POST /api/auth/register
-// @desc    Register user & send email OTP
+// @desc    Register user and log in immediately
 router.post("/register", authLimiter, async (req, res) => {
   const { name, email, password, turnstileToken } = req.body;
   try {
-    if (!isEmailConfigured()) {
-      return res.status(503).json({
-        message: "Email service is not configured on the server. Contact the administrator.",
-      });
-    }
-
     if (!turnstileToken) {
       return res.status(400).json({ message: "Please wait for CAPTCHA to verify before submitting." });
     }
@@ -65,156 +59,23 @@ router.post("/register", authLimiter, async (req, res) => {
       return res.status(400).json({ message: "An account with this email already exists." });
     }
 
-    const otp = generateOtp();
-    const user = new User({ name, email, password, isVerified: false });
-    setEmailOtpFields(user, otp);
+    const user = new User({ name, email, password, isVerified: true });
     await user.save();
 
-    try {
-      await sendVerificationOtp(user, otp);
-      res.status(201).json({
-        message: "Verification code sent to your email.",
-        requiresEmailVerification: true,
-        email: user.email,
-      });
-    } catch (error) {
-      await User.findByIdAndDelete(user._id);
-      console.error("REGISTER EMAIL ERROR:", error.message);
-      return res.status(503).json({
-        message: "Could not send verification email. Check your email address or try again later.",
-        details: process.env.NODE_ENV === "development" ? error.message : undefined,
-      });
-    }
+    await AuditLog.create({ userId: user.id, action: "EMAIL_VERIFIED", ipAddress: req.ip });
+    sendTokenCookie(res, user);
+    
+    res.status(201).json({
+      message: "Registration successful",
+      user: { id: user.id, name: user.name, email: user.email, role: user.role }
+    });
   } catch (err) {
     console.error("REGISTER ERROR:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// @route   POST /api/auth/verify-otp
-// @desc    Verify email with 6-digit OTP
-router.post("/verify-otp", authLimiter, async (req, res) => {
-  const { email, otp } = req.body;
-  try {
-    if (!email || !otp) {
-      return res.status(400).json({ message: "Email and verification code are required." });
-    }
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: "Invalid verification code." });
-    }
-
-    if (user.isVerified) {
-      sendTokenCookie(res, user);
-      return res.json({
-        message: "Email already verified.",
-        user: { id: user.id, name: user.name, email: user.email, role: user.role },
-      });
-    }
-
-    if (!isOtpValid(user, String(otp).trim())) {
-      return res.status(400).json({ message: "Invalid or expired verification code." });
-    }
-
-    user.isVerified = true;
-    clearEmailOtpFields(user);
-    user.verificationToken = undefined;
-    await user.save();
-
-    await AuditLog.create({ userId: user.id, action: "EMAIL_VERIFIED", ipAddress: req.ip });
-    sendTokenCookie(res, user);
-    res.json({
-      message: "Email verified successfully.",
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
-    });
-  } catch (err) {
-    console.error("VERIFY OTP ERROR:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// @route   POST /api/auth/resend-otp
-// @desc    Resend email verification OTP
-router.post("/resend-otp", authLimiter, async (req, res) => {
-  const { email } = req.body;
-  try {
-    if (!isEmailConfigured()) {
-      return res.status(503).json({ message: "Email service is not configured on the server." });
-    }
-
-    const user = await User.findOne({ email });
-    const genericMsg = "If an unverified account exists, a new code has been sent.";
-    if (!user || user.isVerified) {
-      return res.json({ message: genericMsg });
-    }
-
-    const otp = generateOtp();
-    setEmailOtpFields(user, otp);
-    await user.save();
-
-    try {
-      await sendVerificationOtp(user, otp);
-    } catch (error) {
-      console.error("RESEND OTP EMAIL ERROR:", error.message);
-      return res.status(503).json({
-        message: "Could not send verification email. Please try again later.",
-        details: process.env.NODE_ENV === "development" ? error.message : undefined,
-      });
-    }
-
-    res.json({ message: genericMsg, email: user.email });
-  } catch (err) {
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// @route   GET /api/auth/test-email
-// @desc    Test email delivery directly from Render
-router.get("/test-email", async (req, res) => {
-  try {
-    if (!isEmailConfigured()) {
-      return res.status(503).json({
-        message: "Email not configured. Set RESEND_API_KEY or EMAIL_USER + EMAIL_PASS.",
-      });
-    }
-
-    const { email } = req.query;
-    if (!email) return res.status(400).json({ message: "Provide ?email=your_email@gmail.com" });
-    
-    await sendEmail({ 
-      email: email, 
-      subject: "Render Email Test", 
-      message: "If you get this, Render is successfully sending emails!" 
-    });
-    
-    res.json({ message: "Email sent successfully from Render!" });
-  } catch (error) {
-    res.status(500).json({ 
-      message: "Failed to send email from Render", 
-      error: error.message,
-      stack: error.stack
-    });
-  }
-});
-
-// @route   POST /api/auth/verify-email/:token
-// @desc    Verify user email
-router.post("/verify-email/:token", async (req, res) => {
-  try {
-    const user = await User.findOne({ verificationToken: req.params.token });
-    if (!user) return res.status(400).json({ message: "Invalid or expired verification token" });
-
-    user.isVerified = true;
-    user.verificationToken = undefined;
-    await user.save();
-
-    sendTokenCookie(res, user);
-    res.json({ message: "Email verified successfully", user: { id: user.id, name: user.name, email: user.email, role: user.role } });
-  } catch (err) {
-    res.status(500).json({ message: "Server error" });
-  }
-});
 
 // @route   POST /api/auth/login
 // @desc    Authenticate user & get token
