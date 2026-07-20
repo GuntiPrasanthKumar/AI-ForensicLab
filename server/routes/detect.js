@@ -66,6 +66,37 @@ router.post("/detect", authMiddleware, upload.single("file"), async (req, res) =
     res.json(saved);
 
   } catch (err) {
+    // Safety Fallback: If private URL failed with ENOTFOUND or ECONNREFUSED, try public URL as backup
+    if ((err.code === "ENOTFOUND" || err.code === "ECONNREFUSED") && !AI_SERVICE_URL.includes("onrender.com")) {
+      console.log("Private URL failed, attempting fallback to public Render URL...");
+      try {
+        const publicUrl = "https://ai-forensiclab-2.onrender.com/api";
+        const response = await axios.post(`${publicUrl}/${endpoint}`, form, {
+          headers: form.getHeaders(),
+          timeout: timeoutMs,
+        });
+
+        const saved = await Result.create({
+          userId: req.user.userId,
+          filename: req.file.originalname,
+          inputType: isVideo ? "video" : (isImage ? "image" : "file"),
+          aiProbability: response.data.aiProbability || 0,
+          humanProbability: response.data.humanProbability || 0,
+          morphProbability: response.data.morphProbability || 0,
+          confidence: response.data.confidence || "Unknown",
+          explanation: response.data.explanation || "No explanation provided.",
+          reasons: response.data.reasons || [],
+          detectedArtifacts: response.data.detectedArtifacts || [],
+          metrics: response.data.metrics || {}
+        });
+
+        if (tempPath && fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+        return res.json(saved);
+      } catch (fallbackErr) {
+        err = fallbackErr; // Use the fallback error for reporting
+      }
+    }
+
     if (tempPath && fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
     
     let errorMessage = "Analysis failed";
@@ -111,6 +142,22 @@ router.post("/detect-text", authMiddleware, async (req, res) => {
 
     res.json(saved);
   } catch (err) {
+    if ((err.code === "ENOTFOUND" || err.code === "ECONNREFUSED") && !AI_SERVICE_URL.includes("onrender.com")) {
+      console.log("Private URL failed for detect-text, attempting fallback to public Render URL...");
+      try {
+        const publicUrl = "https://ai-forensiclab-2.onrender.com/api";
+        const response = await axios.post(`${publicUrl}/detect-text`, { text });
+        const saved = await Result.create({
+          userId: req.user.userId,
+          filename: "Pasted Text",
+          inputType: "text",
+          ...response.data
+        });
+        return res.json(saved);
+      } catch (fallbackErr) {
+        err = fallbackErr;
+      }
+    }
     console.error(err);
     res.status(500).json({ message: "Text detection failed", error: err.message });
   }
