@@ -107,9 +107,9 @@ def analyze_image_authenticity(image_bytes):
         error_msg = str(e)
         print(f"!!! REAL API ERROR !!!: {error_msg}")
         print("API Connection Failed. Falling back to robust Local Heuristic Analysis...")
-        return local_heuristic_analysis(image_bytes)
+        return local_heuristic_analysis(image_bytes, error_msg=error_msg)
 
-def local_heuristic_analysis(image_bytes):
+def local_heuristic_analysis(image_bytes, error_msg=None):
     # A smart local fallback that checks for authentic camera data when the API hits a limit
     try:
         img = PIL.Image.open(io.BytesIO(image_bytes))
@@ -148,7 +148,7 @@ def local_heuristic_analysis(image_bytes):
             "morphProbability": 0,
             "isNatural": not is_ai,
             "confidence": "Medium (Local Fallback)",
-            "explanation": f"[API QUOTA LIMIT REACHED] {explanation}",
+            "explanation": f"[API ERROR: {error_msg}] {explanation}" if error_msg else f"[API QUOTA LIMIT REACHED] {explanation}",
             "detectedArtifacts": artifacts
         }
     except Exception as e:
