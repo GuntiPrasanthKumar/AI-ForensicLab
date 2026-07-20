@@ -54,7 +54,10 @@ router.post("/register", authLimiter, async (req, res) => {
     }
     const isValidCaptcha = await verifyTurnstile(turnstileToken);
     if (!isValidCaptcha && process.env.NODE_ENV === "production") {
-      return res.status(400).json({ message: "CAPTCHA verification failed. Site Key mismatch." });
+      const maskedSecret = process.env.TURNSTILE_SECRET_KEY 
+        ? `${process.env.TURNSTILE_SECRET_KEY.substring(0, 10)}... (len: ${process.env.TURNSTILE_SECRET_KEY.length})` 
+        : "NOT_SET";
+      return res.status(400).json({ message: `CAPTCHA verification failed. Site Key mismatch. (Backend Secret: ${maskedSecret})` });
     }
 
     const existing = await User.findOne({ email });
@@ -224,7 +227,10 @@ router.post("/login", authLimiter, async (req, res) => {
     }
     const isValidCaptcha = await verifyTurnstile(turnstileToken);
     if (!isValidCaptcha && process.env.NODE_ENV === "production") {
-      return res.status(400).json({ message: "CAPTCHA verification failed. Site Key mismatch." });
+      const maskedSecret = process.env.TURNSTILE_SECRET_KEY 
+        ? `${process.env.TURNSTILE_SECRET_KEY.substring(0, 10)}... (len: ${process.env.TURNSTILE_SECRET_KEY.length})` 
+        : "NOT_SET";
+      return res.status(400).json({ message: `CAPTCHA verification failed. Site Key mismatch. (Backend Secret: ${maskedSecret})` });
     }
 
     const user = await User.findOne({ email });
