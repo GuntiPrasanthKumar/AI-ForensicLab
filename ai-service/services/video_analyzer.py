@@ -33,8 +33,22 @@ def analyze_video_authenticity(video_bytes):
         face_count = 0
         face_ratios = [] # Track face aspect ratio stability
         
-        # Load OpenCV's built-in fast face detector
-        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+        # Load Haar Cascade face detector locally (downloading if not found, since cv2.data.haarcascades can be empty on Render)
+        import urllib.request
+        local_cascade_path = os.path.join(os.path.dirname(__file__), "haarcascade_frontalface_default.xml")
+        if not os.path.exists(local_cascade_path):
+            try:
+                cascade_url = "https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_frontalface_default.xml"
+                print(f"Downloading Haar cascade from: {cascade_url}")
+                urllib.request.urlretrieve(cascade_url, local_cascade_path)
+            except Exception as e:
+                print(f"Failed to download cascade: {e}")
+                
+        face_cascade = cv2.CascadeClassifier(local_cascade_path)
+        if face_cascade.empty():
+            # Fallback to cv2.data.haarcascades just in case
+            face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+        
         
         for i in range(frames_to_process):
             cap.set(cv2.CAP_PROP_POS_FRAMES, i * frame_interval)
