@@ -12,6 +12,7 @@ import TextLab from "./pages/TextLab";
 import About from "./pages/About";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import VerifyEmailOtp from "./pages/VerifyEmailOtp";
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
@@ -32,6 +33,7 @@ function App() {
               <Route path="/register" element={<Auth />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
+              <Route path="/verify-email-otp" element={<VerifyEmailOtp />} />
               <Route path="/about" element={<About />} />
               <Route 
                 path="/app" 
