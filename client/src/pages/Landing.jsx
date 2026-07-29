@@ -24,6 +24,24 @@ const ParticleMesh = (props) => {
   );
 };
 
+import { Component } from "react";
+
+class CanvasErrorBoundary extends Component {
+  state = { hasError: false };
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error) {
+    console.warn("Canvas WebGL error suppressed:", error);
+  }
+  render() {
+    if (this.state.hasError) {
+      return <div className="absolute inset-0 bg-gradient-to-b from-blue-950/20 via-black to-black" />;
+    }
+    return this.props.children;
+  }
+}
+
 const Landing = () => {
   return (
     <div className="bg-black">
@@ -31,12 +49,14 @@ const Landing = () => {
       <div className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden">
         {/* 3D Background */}
         <div className="absolute inset-0 z-0">
-          <Canvas camera={{ position: [0, 0, 1] }}>
-            <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
-            <Float speed={1.5} rotationIntensity={1} floatIntensity={2}>
-              <ParticleMesh />
-            </Float>
-          </Canvas>
+          <CanvasErrorBoundary>
+            <Canvas camera={{ position: [0, 0, 1] }}>
+              <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
+              <Float speed={1.5} rotationIntensity={1} floatIntensity={2}>
+                <ParticleMesh />
+              </Float>
+            </Canvas>
+          </CanvasErrorBoundary>
         </div>
 
         {/* Content Overlay */}

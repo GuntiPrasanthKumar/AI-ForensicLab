@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`, { timeout: 6000 });
       setUser(res.data);
     } catch (err) {
       setUser(null);
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ user, login, logout, loading, fetchUser }}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
