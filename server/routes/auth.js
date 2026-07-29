@@ -62,45 +62,28 @@ router.post("/register", authLimiter, async (req, res) => {
 
     const otp = generateOtp();
     const user = new User({ name, email, password, isVerified: false });
+    setEmailOtpFields(user, otp);
+    await user.save();
 
-    // Check if email service is ready
-    if (isEmailConfigured()) {
-      setEmailOtpFields(user, otp);
-      await user.save();
+    if (!isEmailConfigured()) {
+      await User.findByIdAndDelete(user._id);
+      return res.status(400).json({
+        message: "Email service is not configured on Render. Please add RESEND_API_KEY (or EMAIL_USER + EMAIL_PASS) to Render Environment Variables.",
+      });
+    }
 
-      try {
-        await sendVerificationOtp(user, otp);
-        return res.status(201).json({
-          message: "Verification code sent to your email.",
-          requiresEmailVerification: true,
-          email: user.email,
-        });
-      } catch (error) {
-        console.warn("REGISTER EMAIL FAILED (Falling back to auto-verify):", error.message);
-        // Fallback: Auto-verify user if outbound email fails (e.g. Render Free Tier port block)
-        user.isVerified = true;
-        clearEmailOtpFields(user);
-        await user.save();
-
-        await AuditLog.create({ userId: user.id, action: "EMAIL_VERIFIED", ipAddress: req.ip });
-        sendTokenCookie(res, user);
-        return res.status(201).json({
-          message: "Registration successful.",
-          requiresEmailVerification: false,
-          user: { id: user.id, name: user.name, email: user.email, role: user.role },
-        });
-      }
-    } else {
-      // Email unconfigured: auto-verify user
-      user.isVerified = true;
-      await user.save();
-
-      await AuditLog.create({ userId: user.id, action: "EMAIL_VERIFIED", ipAddress: req.ip });
-      sendTokenCookie(res, user);
+    try {
+      await sendVerificationOtp(user, otp);
       return res.status(201).json({
-        message: "Registration successful.",
-        requiresEmailVerification: false,
-        user: { id: user.id, name: user.name, email: user.email, role: user.role },
+        message: "Verification code sent to your email.",
+        requiresEmailVerification: true,
+        email: user.email,
+      });
+    } catch (error) {
+      await User.findByIdAndDelete(user._id);
+      console.error("REGISTER EMAIL ERROR:", error.message);
+      return res.status(400).json({
+        message: `Could not send OTP email (${error.message}). Please check your email credentials in Render.`,
       });
     }
   } catch (err) {
