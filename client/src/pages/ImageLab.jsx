@@ -49,6 +49,22 @@ const ImageLab = () => {
     }
   };
 
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const droppedFile = e.dataTransfer?.files?.[0];
+    if (droppedFile && droppedFile.type.startsWith("image/")) {
+      setFile(droppedFile);
+      const reader = new FileReader();
+      reader.onloadend = () => setPreview(reader.result);
+      reader.readAsDataURL(droppedFile);
+      setResult(null);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
   return (
     <div className="pt-24 pb-12 max-w-6xl mx-auto px-4 md:px-8 min-h-screen">
       <div className="mb-8">
@@ -61,7 +77,11 @@ const ImageLab = () => {
       <div className="grid lg:grid-cols-2 gap-8">
         <section className="space-y-6">
           <div className="glass-card p-6 rounded-3xl animate-glow">
-            <div className="border-2 border-dashed border-white/10 rounded-2xl p-8 text-center hover:border-blue-500/50 transition-all cursor-pointer relative min-h-[300px] flex flex-col items-center justify-center overflow-hidden group">
+            <div 
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              className="border-2 border-dashed border-white/10 rounded-2xl p-8 text-center hover:border-blue-500/50 transition-all cursor-pointer relative min-h-[300px] flex flex-col items-center justify-center overflow-hidden group"
+            >
               {preview ? (
                 <>
                   <img src={preview} alt="Preview" className={`absolute inset-0 w-full h-full object-contain p-2 ${loading ? 'opacity-50' : 'opacity-100'} transition-opacity`} />
@@ -87,6 +107,7 @@ const ImageLab = () => {
                 type="file" 
                 accept="image/*"
                 onChange={handleFileChange}
+                aria-label="Upload Image File"
                 className="absolute inset-0 opacity-0 cursor-pointer"
                 title=""
               />
