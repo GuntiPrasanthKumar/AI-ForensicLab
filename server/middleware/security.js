@@ -1,7 +1,10 @@
 const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 
-// General API rate limiter
+/**
+ * General API rate limiter to protect public endpoints from excessive requests.
+ * Allows max 100 requests per 15-minute window per IP.
+ */
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per `window`
@@ -10,7 +13,10 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Stricter limiter for authentication routes
+/**
+ * Strict authentication route rate limiter to prevent brute-force login attempts.
+ * Allows max 10 requests per 1-hour window per IP.
+ */
 const authLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 10, // Limit each IP to 10 login/register requests per hour
@@ -19,7 +25,9 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Middleware to prevent NoSQL injection
+/**
+ * Express middleware to sanitize incoming request parameters and prevent NoSQL injection attacks.
+ */
 const sanitizeNoSQL = mongoSanitize();
 
 module.exports = {
