@@ -50,7 +50,8 @@ const HistoryTable = ({ history, deleteHistoryItem }) => {
                 <td className="px-6 py-4">
                   <button 
                     onClick={() => deleteHistoryItem(item._id)}
-                    className="p-2 text-gray-500 hover:text-red-400 transition-all opacity-0 group-hover:opacity-100"
+                    aria-label={`Delete record for ${item.filename}`}
+                    className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -59,7 +60,13 @@ const HistoryTable = ({ history, deleteHistoryItem }) => {
             ))}
             {history.length === 0 && (
               <tr>
-                <td colSpan="5" className="px-6 py-12 text-center text-gray-500">No history records yet.</td>
+                <td colSpan="5" className="px-6 py-16 text-center text-gray-500">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <FileText size={36} className="text-gray-600 mb-1" />
+                    <p className="font-medium text-gray-400">No forensic scans performed yet.</p>
+                    <p className="text-xs text-gray-600">Run an analysis in Image, Video, or Text Lab to save records here.</p>
+                  </div>
+                </td>
               </tr>
             )}
           </tbody>
