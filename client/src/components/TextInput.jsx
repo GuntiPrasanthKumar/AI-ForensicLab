@@ -23,6 +23,11 @@ const TextInput = ({ text, setText, onAnalyze, loading, disabled }) => {
           </div>
         )}
       </div>
+
+      <div className="flex justify-between items-center px-1 text-xs text-gray-500">
+        <span>{text.trim() ? text.trim().split(/\s+/).length : 0} words</span>
+        <span>{text.length} characters</span>
+      </div>
       <button
         onClick={onAnalyze}
         disabled={loading || !text.trim() || disabled}
