@@ -40,6 +40,9 @@ const TextLab = () => {
     }
   };
 
+  const sampleAiText = "In today's fast-paced digital era, artificial intelligence has emerged as a paramount paradigm shift. Furthermore, it is crucial to recognize that machine learning models leverage complex neural architectures to streamline human productivity.";
+  const sampleHumanText = "I went to the store yesterday and ran into an old friend from high school. We ended up chatting for like an hour near the coffee section, totally forgetting what I originally came to buy!";
+
   return (
     <div className="pt-24 pb-12 max-w-6xl mx-auto px-4 md:px-8 min-h-screen">
       <div className="mb-8">
@@ -52,6 +55,21 @@ const TextLab = () => {
       <div className="grid lg:grid-cols-2 gap-8">
         <section className="space-y-6">
           <div className="glass-card p-6 rounded-3xl animate-glow">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-xs text-gray-400">Load sample:</span>
+              <button 
+                onClick={() => { setText(sampleAiText); setError(""); }} 
+                className="text-xs px-3 py-1 bg-purple-500/10 text-purple-300 rounded-full border border-purple-500/20 hover:bg-purple-500/20 transition-all cursor-pointer"
+              >
+                AI Prompt Sample
+              </button>
+              <button 
+                onClick={() => { setText(sampleHumanText); setError(""); }} 
+                className="text-xs px-3 py-1 bg-blue-500/10 text-blue-300 rounded-full border border-blue-500/20 hover:bg-blue-500/20 transition-all cursor-pointer"
+              >
+                Human Sample
+              </button>
+            </div>
             <TextInput text={text} setText={setText} onAnalyze={handleAnalyze} loading={loading} />
             
             <div className="flex gap-4 mt-6">
