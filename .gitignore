@@ -25,3 +25,11 @@ venv/
 client/dist/
 server/dist/
 build/
+
+# Logs and scratch test scripts
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+server/test_*.js
+
