@@ -73,40 +73,8 @@ async function sendViaResend({ email, subject, message, html }) {
   return data;
 }
 
-async function sendViaGmail({ email, subject, message, html }) {
-  // If in production on Render, SMTP is blocked. Route through Vercel serverless proxy.
-  if (process.env.NODE_ENV === "production") {
-    const proxyUrl = "https://ai-forensic-lab.vercel.app/api/sendEmail";
-    console.log("[EMAIL] Gmail (Vercel proxy): sending to", email, "| Subject:", subject);
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 20000);
-      const response = await fetch(proxyUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: email,
-          subject,
-          message,
-          html,
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS
-        }),
-        signal: controller.signal,
-      });
-      clearTimeout(timeout);
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Proxy error");
-      console.log("[EMAIL] Gmail (Vercel proxy): sent successfully");
-      return data;
-    } catch (err) {
-      console.error("[EMAIL] Gmail (Vercel proxy) failed:", err.message);
-      throw new Error(`Vercel Email Proxy failed: ${err.message}`);
-    }
-  }
-
-  // Local development: use standard SMTP
-  console.log("[EMAIL] Gmail SMTP: sending to", email, "| Subject:", subject);
+async function sendSmtp({ email, subject, message, html }) {
+  console.log("[EMAIL] Gmail SMTP direct: sending to", email, "| Subject:", subject);
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
@@ -131,6 +99,51 @@ async function sendViaGmail({ email, subject, message, html }) {
   });
   console.log("[EMAIL] Gmail SMTP: sent successfully | MessageId:", result.messageId);
   return result;
+}
+
+async function sendViaVercelProxy({ email, subject, message, html }) {
+  const proxyUrl = "https://ai-forensic-lab.vercel.app/api/sendEmail";
+  console.log("[EMAIL] Gmail (Vercel proxy): sending to", email, "| Subject:", subject);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 25000);
+  const response = await fetch(proxyUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      to: email,
+      subject,
+      message,
+      html,
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }),
+    signal: controller.signal,
+  });
+  clearTimeout(timeout);
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || `Proxy error (${response.status})`);
+  console.log("[EMAIL] Gmail (Vercel proxy): sent successfully");
+  return data;
+}
+
+async function sendViaGmail(options) {
+  if (process.env.NODE_ENV === "production") {
+    // Production: try Vercel proxy first, then fall back to direct SMTP
+    try {
+      return await sendViaVercelProxy(options);
+    } catch (proxyErr) {
+      console.error("[EMAIL] Vercel proxy failed, trying direct SMTP fallback:", proxyErr.message);
+      try {
+        return await sendSmtp(options);
+      } catch (smtpErr) {
+        console.error("[EMAIL] Direct SMTP also failed:", smtpErr.message);
+        throw new Error(`Email failed via proxy (${proxyErr.message}) and SMTP (${smtpErr.message})`);
+      }
+    }
+  }
+
+  // Local development: direct SMTP
+  return sendSmtp(options);
 }
 
 /**
