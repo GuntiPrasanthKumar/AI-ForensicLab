@@ -14,13 +14,26 @@ const apiLimiter = rateLimit({
 });
 
 /**
- * Strict authentication route rate limiter to prevent brute-force login attempts.
- * Allows max 10 requests per 1-hour window per IP.
+ * Authentication route rate limiter for login/register.
+ * Increased from 10 to 20 per hour to accommodate the full
+ * registration + OTP verification + resend + reset flow.
  */
 const authLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // Limit each IP to 10 login/register requests per hour
-  message: { message: "Too many failed login attempts, please try again after an hour" },
+  max: 20, // Limit each IP to 20 auth requests per hour
+  message: { message: "Too many requests, please try again after an hour" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+/**
+ * OTP-specific rate limiter to prevent OTP brute-force attacks.
+ * 6 requests per 15-minute window per IP — covers verify + resend cycles.
+ */
+const otpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 6,
+  message: { message: "Too many OTP attempts. Please try again in 15 minutes." },
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -33,5 +46,6 @@ const sanitizeNoSQL = mongoSanitize();
 module.exports = {
   apiLimiter,
   authLimiter,
+  otpLimiter,
   sanitizeNoSQL
 };

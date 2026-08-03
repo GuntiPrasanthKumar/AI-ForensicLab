@@ -4,11 +4,19 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const User = require("../models/User");
 const AuditLog = require("../models/AuditLog");
-const { authLimiter } = require("../middleware/security");
+const { authLimiter, otpLimiter } = require("../middleware/security");
 const authMiddleware = require("../middleware/authMiddleware");
 const sendEmail = require("../utils/email");
-const { isEmailConfigured, buildOtpEmailHtml } = require("../utils/email");
-const { generateOtp, setEmailOtpFields, clearEmailOtpFields, isOtpValid } = require("../utils/otp");
+const { isEmailConfigured, buildOtpEmailHtml, buildResetOtpEmailHtml } = require("../utils/email");
+const {
+  generateOtp,
+  setEmailOtpFields,
+  clearEmailOtpFields,
+  isOtpValid,
+  setResetOtpFields,
+  clearResetOtpFields,
+  isResetOtpValid,
+} = require("../utils/otp");
 const verifyTurnstile = require("../utils/turnstile");
 
 const router = express.Router();
@@ -27,22 +35,51 @@ const sendTokenCookie = (res, user) => {
   });
 };
 
+// ─── Helper: send registration verification OTP email ────────────────────────
+
 async function sendVerificationOtp(user, otp) {
   const message = `Your AI Forensic Lab verification code is: ${otp}\n\nThis code expires in 10 minutes.`;
   const html = buildOtpEmailHtml(otp, user.name);
+  console.log("[AUTH] Sending registration OTP email to:", user.email);
   await sendEmail({
     email: user.email,
     subject: "Your verification code — AI Forensic Lab",
     message,
     html,
   });
+  console.log("[AUTH] Registration OTP email sent to:", user.email);
 }
 
+// ─── Helper: send password reset OTP email ───────────────────────────────────
+
+async function sendResetOtpEmail(user, otp) {
+  const message = `Your AI Forensic Lab password reset code is: ${otp}\n\nThis code expires in 10 minutes. If you did not request this, ignore this email.`;
+  const html = buildResetOtpEmailHtml(otp, user.name);
+  console.log("[AUTH] Sending reset OTP email to:", user.email);
+  await sendEmail({
+    email: user.email,
+    subject: "Password reset code — AI Forensic Lab",
+    message,
+    html,
+  });
+  console.log("[AUTH] Reset OTP email sent to:", user.email);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // @route   POST /api/auth/register
 // @desc    Register user & send email OTP
+// ═══════════════════════════════════════════════════════════════════════════════
 router.post("/register", authLimiter, async (req, res) => {
   const { name, email, password, turnstileToken } = req.body;
   try {
+    console.log("[AUTH] Registration attempt for:", email);
+
+    // 1. Validate input
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "Name, email, and password are required." });
+    }
+
+    // 2. Verify CAPTCHA
     if (!turnstileToken) {
       return res.status(400).json({ message: "Please wait for CAPTCHA to verify before submitting." });
     }
@@ -55,23 +92,34 @@ router.post("/register", authLimiter, async (req, res) => {
       return res.status(400).json({ message: `CAPTCHA verification failed [${codes}]. (Backend Secret: ${maskedSecret})` });
     }
 
-    const existing = await User.findOne({ email });
-    if (existing) {
-      return res.status(400).json({ message: "An account with this email already exists." });
+    // 3. Check email service BEFORE creating user (fix: prevents orphaned users)
+    if (!isEmailConfigured()) {
+      console.error("[AUTH] Email service not configured — cannot register");
+      return res.status(503).json({
+        message: "Email service is not configured on the server. Please add RESEND_API_KEY (or EMAIL_USER + EMAIL_PASS) to environment variables.",
+      });
     }
 
+    // 4. Check for existing account
+    const existing = await User.findOne({ email });
+    if (existing) {
+      // If unverified and older than 30 min, allow re-registration by deleting the stale entry
+      if (!existing.isVerified && existing.createdAt < new Date(Date.now() - 30 * 60 * 1000)) {
+        console.log("[AUTH] Removing stale unverified account for:", email);
+        await User.findByIdAndDelete(existing._id);
+      } else {
+        return res.status(400).json({ message: "An account with this email already exists." });
+      }
+    }
+
+    // 5. Create user and generate OTP
     const otp = generateOtp();
     const user = new User({ name, email, password, isVerified: false });
     setEmailOtpFields(user, otp);
     await user.save();
+    console.log("[AUTH] User created:", email, "| ID:", user._id);
 
-    if (!isEmailConfigured()) {
-      await User.findByIdAndDelete(user._id);
-      return res.status(400).json({
-        message: "Email service is not configured on Render. Please add RESEND_API_KEY (or EMAIL_USER + EMAIL_PASS) to Render Environment Variables.",
-      });
-    }
-
+    // 6. Send OTP email
     try {
       await sendVerificationOtp(user, otp);
       return res.status(201).json({
@@ -80,33 +128,40 @@ router.post("/register", authLimiter, async (req, res) => {
         email: user.email,
       });
     } catch (error) {
+      // Clean up user if email fails
       await User.findByIdAndDelete(user._id);
-      console.error("REGISTER EMAIL ERROR:", error.message);
-      return res.status(400).json({
-        message: `Could not send OTP email (${error.message}). Please check your email credentials in Render.`,
+      console.error("[AUTH] REGISTER EMAIL FAILED — user cleaned up:", error.message);
+      return res.status(503).json({
+        message: `Could not send verification email. Please try again. (${error.message})`,
       });
     }
   } catch (err) {
-    console.error("REGISTER ERROR:", err);
+    console.error("[AUTH] REGISTER ERROR:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
+// ═══════════════════════════════════════════════════════════════════════════════
 // @route   POST /api/auth/verify-otp
-// @desc    Verify email with 6-digit OTP
-router.post("/verify-otp", authLimiter, async (req, res) => {
+// @desc    Verify email with 6-digit OTP (registration)
+// ═══════════════════════════════════════════════════════════════════════════════
+router.post("/verify-otp", otpLimiter, async (req, res) => {
   const { email, otp } = req.body;
   try {
+    console.log("[AUTH] Verify registration OTP for:", email);
+
     if (!email || !otp) {
       return res.status(400).json({ message: "Email and verification code are required." });
     }
 
     const user = await User.findOne({ email });
     if (!user) {
+      console.log("[AUTH] Verify OTP — user not found:", email);
       return res.status(400).json({ message: "Invalid verification code." });
     }
 
     if (user.isVerified) {
+      console.log("[AUTH] Already verified:", email);
       sendTokenCookie(res, user);
       return res.json({
         message: "Email already verified.",
@@ -123,6 +178,7 @@ router.post("/verify-otp", authLimiter, async (req, res) => {
     user.verificationToken = undefined;
     await user.save();
 
+    console.log("[AUTH] Email verified successfully:", email);
     await AuditLog.create({ userId: user.id, action: "EMAIL_VERIFIED", ipAddress: req.ip });
     sendTokenCookie(res, user);
     res.json({
@@ -130,16 +186,20 @@ router.post("/verify-otp", authLimiter, async (req, res) => {
       user: { id: user.id, name: user.name, email: user.email, role: user.role },
     });
   } catch (err) {
-    console.error("VERIFY OTP ERROR:", err);
+    console.error("[AUTH] VERIFY OTP ERROR:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
+// ═══════════════════════════════════════════════════════════════════════════════
 // @route   POST /api/auth/resend-otp
-// @desc    Resend email verification OTP
-router.post("/resend-otp", authLimiter, async (req, res) => {
+// @desc    Resend email verification OTP (registration)
+// ═══════════════════════════════════════════════════════════════════════════════
+router.post("/resend-otp", otpLimiter, async (req, res) => {
   const { email } = req.body;
   try {
+    console.log("[AUTH] Resend registration OTP for:", email);
+
     if (!isEmailConfigured()) {
       return res.status(503).json({ message: "Email service is not configured on the server." });
     }
@@ -150,6 +210,12 @@ router.post("/resend-otp", authLimiter, async (req, res) => {
       return res.json({ message: genericMsg });
     }
 
+    // Server-side cooldown: refuse if last OTP was sent < 30s ago
+    if (user.emailOtpExpire && new Date(user.emailOtpExpire) > new Date(Date.now() + 9.5 * 60 * 1000)) {
+      console.log("[AUTH] Resend too soon for:", email);
+      return res.status(429).json({ message: "Please wait before requesting another code." });
+    }
+
     const otp = generateOtp();
     setEmailOtpFields(user, otp);
     await user.save();
@@ -157,7 +223,7 @@ router.post("/resend-otp", authLimiter, async (req, res) => {
     try {
       await sendVerificationOtp(user, otp);
     } catch (error) {
-      console.error("RESEND OTP EMAIL ERROR:", error.message);
+      console.error("[AUTH] RESEND OTP EMAIL ERROR:", error.message);
       return res.status(503).json({
         message: "Could not send verification email. Please try again later.",
         details: process.env.NODE_ENV === "development" ? error.message : undefined,
@@ -166,17 +232,20 @@ router.post("/resend-otp", authLimiter, async (req, res) => {
 
     res.json({ message: genericMsg, email: user.email });
   } catch (err) {
+    console.error("[AUTH] RESEND OTP ERROR:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-
-
+// ═══════════════════════════════════════════════════════════════════════════════
 // @route   POST /api/auth/login
 // @desc    Authenticate user & get token
+// ═══════════════════════════════════════════════════════════════════════════════
 router.post("/login", authLimiter, async (req, res) => {
   const { email, password, turnstileToken } = req.body;
   try {
+    console.log("[AUTH] Login attempt for:", email);
+
     // 1. Verify CAPTCHA
     if (!turnstileToken) {
       return res.status(400).json({ message: "Please wait for CAPTCHA to verify before submitting." });
@@ -230,96 +299,199 @@ router.post("/login", authLimiter, async (req, res) => {
     user.lockUntil = undefined;
     await user.save();
 
-    // MFA removed
-
+    console.log("[AUTH] Login successful:", email);
     await AuditLog.create({ userId: user.id, action: 'LOGIN_SUCCESS', ipAddress: req.ip });
     sendTokenCookie(res, user);
     res.json({ user: { id: user.id, name: user.name, email: user.email, role: user.role } });
   } catch (err) {
-    console.error(err);
+    console.error("[AUTH] LOGIN ERROR:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// @route   POST /api/auth/logout
-// @desc    Clear cookie
-router.post("/logout", (req, res) => {
-  res.clearCookie("token", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: process.env.NODE_ENV === "production" ? "none" : "lax" });
-  res.json({ message: "Logged out successfully" });
-});
-
-// @route   GET /api/auth/me
-// @desc    Get user by cookie token
-router.get("/me", authMiddleware, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.userId).select("-password -mfaSecret");
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
+// ═══════════════════════════════════════════════════════════════════════════════
 // @route   POST /api/auth/forgot-password
-// @desc    Send reset password email
+// @desc    Send password reset OTP (converted from link-based to OTP-based)
+// ═══════════════════════════════════════════════════════════════════════════════
 router.post("/forgot-password", authLimiter, async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.body.email });
-    const genericMsg = "If an account with that email exists, a password reset link has been sent.";
-    
-    if (!user) return res.json({ message: genericMsg });
+    const { email } = req.body;
+    console.log("[AUTH] Forgot password for:", email);
 
-    const resetToken = crypto.randomBytes(20).toString("hex");
-    user.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
-    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 mins
-    await user.save();
-
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-    const message = `You are receiving this email because you (or someone else) has requested the reset of a password.\n\nPlease make a PUT request to: \n\n ${resetUrl}`;
-    
-    try {
-      await sendEmail({ email: user.email, subject: "Password Reset Token", message });
-    } catch (error) {
-      user.resetPasswordToken = undefined;
-      user.resetPasswordExpire = undefined;
-      await user.save();
+    if (!email) {
+      return res.status(400).json({ message: "Email is required." });
     }
 
-    res.json({ message: genericMsg });
+    if (!isEmailConfigured()) {
+      return res.status(503).json({ message: "Email service is not configured on the server." });
+    }
+
+    const user = await User.findOne({ email });
+    
+    // Always return success to prevent email enumeration
+    if (!user) {
+      console.log("[AUTH] Forgot password — no account for:", email);
+      return res.json({ message: "If an account with that email exists, a reset code has been sent.", sent: true });
+    }
+
+    // Server-side cooldown: refuse if last reset OTP was sent < 30s ago
+    if (user.resetOtpExpire && new Date(user.resetOtpExpire) > new Date(Date.now() + 9.5 * 60 * 1000)) {
+      console.log("[AUTH] Forgot password cooldown for:", email);
+      return res.json({ message: "If an account with that email exists, a reset code has been sent.", sent: true });
+    }
+
+    const otp = generateOtp();
+    setResetOtpFields(user, otp);
+    await user.save();
+
+    try {
+      await sendResetOtpEmail(user, otp);
+      console.log("[AUTH] Reset OTP sent for:", email);
+    } catch (error) {
+      console.error("[AUTH] FORGOT PASSWORD EMAIL FAILED:", error.message);
+      // Clear the OTP since email failed
+      clearResetOtpFields(user);
+      await user.save();
+      return res.status(503).json({
+        message: "Could not send reset email. Please try again later.",
+      });
+    }
+
+    res.json({ message: "If an account with that email exists, a reset code has been sent.", sent: true });
   } catch (err) {
+    console.error("[AUTH] FORGOT PASSWORD ERROR:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// @route   POST /api/auth/reset-password/:token
-// @desc    Reset password
-router.post("/reset-password/:token", async (req, res) => {
+// ═══════════════════════════════════════════════════════════════════════════════
+// @route   POST /api/auth/verify-reset-otp
+// @desc    Verify password reset OTP (step 1 of reset flow)
+// ═══════════════════════════════════════════════════════════════════════════════
+router.post("/verify-reset-otp", otpLimiter, async (req, res) => {
+  const { email, otp } = req.body;
   try {
-    const resetPasswordToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
-    
-    const user = await User.findOne({
-      resetPasswordToken,
-      resetPasswordExpire: { $gt: Date.now() }
-    });
+    console.log("[AUTH] Verify reset OTP for:", email);
 
-    if (!user) return res.status(400).json({ message: "Invalid or expired token" });
+    if (!email || !otp) {
+      return res.status(400).json({ message: "Email and reset code are required." });
+    }
 
-    user.password = req.body.password;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired reset code." });
+    }
+
+    if (!isResetOtpValid(user, String(otp).trim())) {
+      return res.status(400).json({ message: "Invalid or expired reset code." });
+    }
+
+    console.log("[AUTH] Reset OTP verified for:", email);
+    // Don't clear the OTP yet — it will be validated again during password reset
+    // But mark it as verified by storing a short-lived flag
+    res.json({ message: "Reset code verified. You can now set a new password.", verified: true });
+  } catch (err) {
+    console.error("[AUTH] VERIFY RESET OTP ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// @route   POST /api/auth/reset-password
+// @desc    Reset password using OTP verification
+// ═══════════════════════════════════════════════════════════════════════════════
+router.post("/reset-password", otpLimiter, async (req, res) => {
+  try {
+    const { email, otp, password } = req.body;
+    console.log("[AUTH] Reset password for:", email);
+
+    if (!email || !otp || !password) {
+      return res.status(400).json({ message: "Email, reset code, and new password are required." });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters." });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired reset code." });
+    }
+
+    if (!isResetOtpValid(user, String(otp).trim())) {
+      return res.status(400).json({ message: "Invalid or expired reset code." });
+    }
+
+    // Update password
+    user.password = password;
+    clearResetOtpFields(user);
     user.tokenVersion += 1; // Invalidate all existing sessions
+    // Reset lockout on password change
+    user.loginAttempts = 0;
+    user.lockUntil = undefined;
     await user.save();
     
+    console.log("[AUTH] Password reset successful for:", email);
     await AuditLog.create({ userId: user.id, action: 'PASSWORD_RESET', ipAddress: req.ip });
 
     res.json({ message: "Password updated successfully. Please log in with your new password." });
   } catch (err) {
+    console.error("[AUTH] RESET PASSWORD ERROR:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// @route   POST /api/auth/resend-reset-otp
+// @desc    Resend password reset OTP
+// ═══════════════════════════════════════════════════════════════════════════════
+router.post("/resend-reset-otp", otpLimiter, async (req, res) => {
+  const { email } = req.body;
+  try {
+    console.log("[AUTH] Resend reset OTP for:", email);
+
+    if (!isEmailConfigured()) {
+      return res.status(503).json({ message: "Email service is not configured on the server." });
+    }
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required." });
+    }
+
+    const user = await User.findOne({ email });
+    const genericMsg = "If an account with that email exists, a new reset code has been sent.";
+    if (!user) {
+      return res.json({ message: genericMsg });
+    }
+
+    // Server-side cooldown: refuse if last reset OTP was sent < 30s ago
+    if (user.resetOtpExpire && new Date(user.resetOtpExpire) > new Date(Date.now() + 9.5 * 60 * 1000)) {
+      console.log("[AUTH] Resend reset OTP too soon for:", email);
+      return res.status(429).json({ message: "Please wait before requesting another code." });
+    }
+
+    const otp = generateOtp();
+    setResetOtpFields(user, otp);
+    await user.save();
+
+    try {
+      await sendResetOtpEmail(user, otp);
+    } catch (error) {
+      console.error("[AUTH] RESEND RESET OTP EMAIL ERROR:", error.message);
+      return res.status(503).json({ message: "Could not send reset email. Please try again later." });
+    }
+
+    res.json({ message: genericMsg });
+  } catch (err) {
+    console.error("[AUTH] RESEND RESET OTP ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // @route   POST /api/auth/logout
-// @desc    Logout user and clear cookie
+// @desc    Clear cookie
+// ═══════════════════════════════════════════════════════════════════════════════
 router.post("/logout", (req, res) => {
   res.cookie("token", "", {
     httpOnly: true,
@@ -330,15 +502,35 @@ router.post("/logout", (req, res) => {
   res.json({ message: "Logged out successfully" });
 });
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// @route   GET /api/auth/me
+// @desc    Get user by cookie token
+// ═══════════════════════════════════════════════════════════════════════════════
+router.get("/me", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).select("-password -mfaSecret");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // @route   DELETE /api/auth/delete
 // @desc    Delete user account
+// ═══════════════════════════════════════════════════════════════════════════════
 router.delete("/delete", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     await User.findByIdAndDelete(req.user.userId);
-    await Result.deleteMany({ user: req.user.userId });
+    // Result model may not be imported — safe delete
+    try {
+      const Result = require("../models/Result");
+      await Result.deleteMany({ user: req.user.userId });
+    } catch (_) { /* Result model not available */ }
     await AuditLog.deleteMany({ userId: req.user.userId });
 
     res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "none" });

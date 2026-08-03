@@ -11,10 +11,16 @@ const UserSchema = new mongoose.Schema({
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   isVerified: { type: Boolean, default: false },
   verificationToken: { type: String },
+
+  // Registration Email OTP
   emailOtp: { type: String },
   emailOtpExpire: { type: Date },
   
-  // Password Reset
+  // Password Reset OTP (independent from registration OTP)
+  resetOtp: { type: String },
+  resetOtpExpire: { type: Date },
+
+  // Legacy Password Reset (token-based — kept for backward compat)
   resetPasswordToken: { type: String },
   resetPasswordExpire: { type: Date },
   

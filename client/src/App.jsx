@@ -32,7 +32,7 @@ function App() {
               <Route path="/login" element={<Auth />} />
               <Route path="/register" element={<Auth />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password/:token" element={<ResetPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/verify-email-otp" element={<VerifyEmailOtp />} />
               <Route path="/about" element={<About />} />
               <Route 

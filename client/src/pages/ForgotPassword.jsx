@@ -1,22 +1,37 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Mail, ArrowLeft } from "lucide-react";
 import axios from "axios";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
+    setMessage("");
+
     try {
       const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
       const res = await axios.post(`${API_BASE}/api/auth/forgot-password`, { email });
-      setMessage(res.data.message);
+      
+      if (res.data.sent) {
+        // Navigate to the reset password page with OTP input
+        navigate("/reset-password", { state: { email } });
+      } else {
+        setMessage(res.data.message);
+      }
     } catch (err) {
-      setMessage("An error occurred. Please try again.");
+      if (!err.response) {
+        setError("Cannot reach the server. Please check your connection and try again.");
+      } else {
+        setError(err.response?.data?.message || "An error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -29,7 +44,7 @@ const ForgotPassword = () => {
           <ArrowLeft size={16} className="mr-2" /> Back to Login
         </Link>
         <h1 className="text-3xl font-bold text-white mb-2">Reset Password</h1>
-        <p className="text-gray-400 mb-6">Enter your email and we'll send you a link to reset your password.</p>
+        <p className="text-gray-400 mb-6">Enter your email and we'll send you a 6-digit code to reset your password.</p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -49,14 +64,15 @@ const ForgotPassword = () => {
             </div>
           </div>
 
-          {message && <div className="text-sm text-blue-400 bg-blue-500/10 p-3 rounded-lg">{message}</div>}
+          {error && <div className="text-sm text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20">{error}</div>}
+          {message && <div className="text-sm text-blue-400 bg-blue-500/10 p-3 rounded-lg border border-blue-500/20">{message}</div>}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] disabled:opacity-50"
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Sending..." : "Send Reset Link"}
+            {loading ? "Sending..." : "Send Reset Code"}
           </button>
         </form>
       </div>
