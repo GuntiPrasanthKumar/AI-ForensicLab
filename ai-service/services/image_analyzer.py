@@ -1,122 +1,110 @@
-import io
 import os
-import random
-import hashlib
+import time
 from typing import Dict, Any
-import PIL.Image
-from dotenv import load_dotenv
 
-from services.provider_manager import provider_manager, AIProviderManager
-
-env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
-load_dotenv(dotenv_path=env_path)
+from services.image_preprocessor import preprocess_image
+from services.cv_model_engine import run_cv_model_inference
+from services.metadata_engine import analyze_metadata
+from services.artifact_engine import analyze_digital_artifacts
+from services.hybrid_scorer import compute_hybrid_score
+from services.explainability_engine import generate_explainability_report
 
 def analyze_image_authenticity(image_bytes: bytes) -> Dict[str, Any]:
-    print(f"--- Starting Image Analysis ({len(image_bytes)} bytes) ---")
-
-    prompt = """
-    You are a World-Class Forensic Image Expert. Determine if the attached image is:
-    1. AI-Generated: Created by DALL-E, Midjourney, Stable Diffusion, Flux, etc.
-    2. Deepfake/Morphed: Real image with manipulated face or features.
-    3. Authentic/Natural: Real photograph taken by a physical camera with no AI generation.
-
-    CRITICAL: If the image exhibits natural sensor noise, camera EXIF signatures, organic skin textures, and consistent physical lighting, mark it as NATURAL with 0% AI probability.
-
-    Respond ONLY with structured JSON in this format:
-    {
-        "aiProbability": 0 to 100,
-        "morphProbability": 0 to 100,
-        "isNatural": true or false,
-        "confidence": "High" or "Medium" or "Low",
-        "explanation": "State key forensic observations regarding lighting, specular highlights, textures, and artifacts.",
-        "detectedArtifacts": ["list", "of", "observations"]
-    }
     """
+    Main entry point for AI Image Forensics Analysis.
+    Executes complete multi-layer computer vision pipeline:
+    1. Preprocessing & Integrity Check
+    2. Deep Learning Model Inference (PyTorch)
+    3. EXIF & AI Generator Metadata Inspection
+    4. Digital Artifact Signal Processing (ELA + 2D FFT)
+    5. Hybrid Scoring Engine
+    6. Explainability & Heatmap Generation
+    """
+    t0 = time.time()
+    print(f"\n=======================================================")
+    print(f"[Forensic Engine] Starting Image Analysis ({len(image_bytes)} bytes)")
+    print(f"=======================================================")
 
     try:
-        raw_text, provider_used = provider_manager.generate_completion(prompt, image_bytes)
-        data = provider_manager.parse_json_response(raw_text)
+        # Step 1: Preprocessing & Color Space Conversion
+        prep = preprocess_image(image_bytes)
+        pil_img = prep["pil_image"]
+        np_img = prep["np_image"]
 
-        ai_prob = float(data.get("aiProbability", 0))
-        morph_prob = float(data.get("morphProbability", 0))
+        # Step 2: Deep Learning Vision Model Inference
+        cv_res = run_cv_model_inference(pil_img, np_img)
 
-        normalized_data = {
-            "aiProbability": round(ai_prob, 1),
-            "morphProbability": round(morph_prob, 1),
-            "humanProbability": round(max(0.0, 100.0 - max(ai_prob, morph_prob)), 1),
-            "isNatural": bool(data.get("isNatural", ai_prob < 50)),
-            "confidence": str(data.get("confidence", "High")),
-            "explanation": str(data.get("explanation", "Forensic vision analysis complete.")),
-            "detectedArtifacts": list(data.get("detectedArtifacts", [])),
-            "provider_used": provider_used,
-            "engine_status": "Active Provider"
+        # Step 3: Metadata & EXIF Analysis
+        meta_res = analyze_metadata(pil_img, image_bytes)
+
+        # Step 4: Digital Image Artifact Analysis (ELA + FFT)
+        art_res = analyze_digital_artifacts(pil_img, np_img)
+
+        # Step 5: Hybrid Confidence Scoring Engine
+        scoring = compute_hybrid_score(
+            model_score=cv_res["ai_model_probability"],
+            artifact_score=art_res["artifact_ai_score"],
+            metadata_score=meta_res["metadata_ai_score"],
+            is_camera_authentic=meta_res["is_camera_authentic"],
+            has_ai_signature=meta_res["has_ai_signature"]
+        )
+
+        # Step 6: Explainability & Heatmap Report
+        report = generate_explainability_report(scoring, meta_res, art_res, cv_res)
+
+        elapsed = round(time.time() - t0, 3)
+        print(f"[Forensic Engine] Completed in {elapsed}s | Result: {scoring['aiProbability']}% AI ({scoring['risk_level']})")
+
+        # Package complete structured forensic JSON payload
+        response = {
+            "aiProbability": scoring["aiProbability"],
+            "humanProbability": scoring["humanProbability"],
+            "morphProbability": scoring["morphProbability"],
+            "confidence": scoring["confidence"],
+            "risk_level": scoring["risk_level"],
+            "explanation": report["explanation"],
+            "reasons": report["reasons"],
+            "detectedArtifacts": report["detectedArtifacts"],
+            "heatmap_base64": report.get("heatmap_base64"),
+            "provider_used": cv_res.get("model_name", "PyTorch Hybrid Vision Engine"),
+            "engine_status": "Active Computer Vision Pipeline",
+            "is_cached": False,
+            "metrics": {
+                "model_score": cv_res["ai_model_probability"],
+                "artifact_score": art_res["artifact_ai_score"],
+                "metadata_score": meta_res["metadata_ai_score"],
+                "file_width": prep["width"],
+                "file_height": prep["height"],
+                "file_format": prep["format"],
+                "processing_time_sec": elapsed,
+                **art_res.get("artifact_metrics", {})
+            },
+            "metadata_summary": meta_res.get("metadata_summary", {})
         }
 
-        print(f"SUCCESS [{provider_used}]: Analysis results ({normalized_data['aiProbability']}% AI)")
-        return normalized_data
+        return response
 
     except Exception as e:
-        error_msg = str(e)
-        print(f"[Image Analysis] AI Provider chain failed ({error_msg}). Falling back to Local Heuristic Engine...")
-        return local_heuristic_analysis(image_bytes, error_msg=error_msg)
+        print(f"[Forensic Engine Error] Pipeline failed: {e}")
+
+        # Fail-safe dynamic inspection if unexpected exception occurs
+        return _fallback_error_response(image_bytes, str(e))
 
 
-def local_heuristic_analysis(image_bytes: bytes, error_msg: str = None) -> Dict[str, Any]:
-    """Smart local fallback checking EXIF tags, dimensions, and noise heuristics."""
-    try:
-        img = PIL.Image.open(io.BytesIO(image_bytes))
-        exif = img.getexif()
-
-        is_camera = False
-        artifacts = []
-
-        # Check standard EXIF metadata tags (Make=271, Model=272, DateTime=306, Software=305)
-        if exif and (271 in exif or 272 in exif or 306 in exif):
-            is_camera = True
-            make = str(exif.get(271, "")).strip()
-            model = str(exif.get(272, "")).strip()
-            artifacts.append(f"Authentic Camera Metadata: {make} {model}".strip())
-
-        # Hash image for deterministic reproducibility
-        hasher = hashlib.md5(image_bytes)
-        seed = int(hasher.hexdigest(), 16) % (2**32)
-        random.seed(seed)
-
-        if is_camera:
-            ai_prob = round(random.uniform(2.0, 8.0), 1)
-            explanation = "Local Forensic Fallback: Strong indicators of natural photography. Image contains authentic hardware EXIF tags typical of physical cameras."
-            artifacts.append("Natural digital noise distribution")
-            is_ai = False
-        else:
-            ai_prob = round(random.uniform(62.0, 85.0), 1)
-            explanation = "Local Forensic Fallback: Lacks physical camera hardware EXIF tags. Smooth color gradients suggest potential synthetic generation or editing."
-            artifacts.append("Missing Camera Hardware EXIF")
-            artifacts.append("Synthetic edge blending signatures")
-            is_ai = True
-
-        random.seed(None)
-
-        return {
-            "aiProbability": ai_prob,
-            "humanProbability": round(100.0 - ai_prob, 1),
-            "morphProbability": 0,
-            "isNatural": not is_ai,
-            "confidence": "Medium (Local Engine)",
-            "explanation": explanation,
-            "detectedArtifacts": artifacts,
-            "provider_used": "Local Forensic Heuristics",
-            "engine_status": "Backup Local Engine"
-        }
-    except Exception as e:
-        print(f"Local heuristic failed: {e}")
-        return {
-            "aiProbability": 50.0,
-            "humanProbability": 50.0,
-            "morphProbability": 0,
-            "isNatural": True,
-            "confidence": "Low",
-            "explanation": "Basic image structure processed. No definitive synthetic metadata identified.",
-            "detectedArtifacts": ["Standard image format"],
-            "provider_used": "Local Fail-safe",
-            "engine_status": "Backup Local Engine"
-        }
+def _fallback_error_response(image_bytes: bytes, err_msg: str) -> Dict[str, Any]:
+    """Graceful error fallback returning dynamic basic container properties."""
+    return {
+        "aiProbability": 50.0,
+        "humanProbability": 50.0,
+        "morphProbability": 0.0,
+        "confidence": "Low (Fail-safe)",
+        "risk_level": "Uncertain",
+        "explanation": f"Forensic vision pipeline encountered exception: {err_msg}",
+        "reasons": ["Processing exception handled cleanly"],
+        "detectedArtifacts": ["Standard file format"],
+        "heatmap_base64": None,
+        "provider_used": "PyTorch Fail-safe Engine",
+        "engine_status": "Backup Mode Active",
+        "is_cached": False,
+        "metrics": {"error": err_msg}
+    }

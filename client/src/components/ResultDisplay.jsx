@@ -92,17 +92,36 @@ const ResultDisplay = ({ result }) => {
       {/* Reasons / Artifacts List */}
       <div className="glass-card p-5 sm:p-6 rounded-3xl">
         <h3 className="text-sm font-medium text-gray-400 mb-4 uppercase">
-          {result.inputType === 'image' ? 'Detected Artifacts' : 'Key Observations'}
+          {result.inputType === 'image' ? 'Detected Artifacts & Signal Observations' : 'Key Observations'}
         </h3>
         <ul className="space-y-3">
           {(result.detectedArtifacts || result.reasons || []).map((item, i) => (
-            <li key={i} className="flex items-center gap-3 text-gray-300 text-sm">
-              <CheckCircle2 size={16} className="text-blue-500" />
-              {item}
+            <li key={i} className="flex items-start gap-3 text-gray-300 text-sm">
+              <CheckCircle2 size={16} className="text-blue-500 shrink-0 mt-0.5" />
+              <span>{item}</span>
             </li>
           ))}
         </ul>
       </div>
+
+      {/* ELA Heatmap Visualization (if available for image) */}
+      {(result.heatmap_base64 || result.heatmapBase64) && (
+        <div className="glass-card p-5 sm:p-6 rounded-3xl">
+          <h3 className="text-sm font-medium text-gray-400 mb-4 uppercase flex items-center gap-2">
+            <Zap size={16} className="text-amber-400" /> Error Level Analysis (ELA) Compression Heatmap
+          </h3>
+          <div className="relative rounded-2xl overflow-hidden border border-white/10 max-h-[300px] bg-black/40 flex items-center justify-center">
+            <img 
+              src={result.heatmap_base64 || result.heatmapBase64} 
+              alt="ELA Compression Heatmap" 
+              className="w-full h-full object-contain max-h-[300px]"
+            />
+          </div>
+          <p className="text-xs text-gray-400 mt-3 italic">
+            Bright hotspots highlight digital editing, synthetic re-encoding discrepancy, or compression edge anomalies.
+          </p>
+        </div>
+      )}
     </motion.div>
   );
 };
