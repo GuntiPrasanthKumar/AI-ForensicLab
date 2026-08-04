@@ -368,11 +368,14 @@ router.post("/forgot-password", authLimiter, async (req, res) => {
       console.log("[AUTH] Reset OTP sent for:", cleanEmail);
     } catch (error) {
       console.error("[AUTH] FORGOT PASSWORD EMAIL FAILED:", error.stack || error.message);
-      // Clear the OTP since email failed
-      clearResetOtpFields(user);
-      await user.save();
+      try {
+        clearResetOtpFields(user);
+        await user.save();
+      } catch (saveErr) {
+        console.error("[AUTH] Safe cleanup error:", saveErr.message);
+      }
       return res.status(503).json({
-        message: "Could not send reset email. Please try again later.",
+        message: `Could not send reset email. Please try again later. (${error.message})`,
       });
     }
 
