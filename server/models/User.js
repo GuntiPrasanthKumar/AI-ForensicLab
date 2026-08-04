@@ -4,11 +4,11 @@ const bcrypt = require("bcryptjs");
 const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { type: String },
   createdAt: { type: Date, default: Date.now },
   
   // Security Fields
-  role: { type: String, enum: ['user', 'admin'], default: 'user' },
+  role: { type: String, default: 'user' },
   isVerified: { type: Boolean, default: false },
   verificationToken: { type: String },
 
@@ -25,14 +25,14 @@ const UserSchema = new mongoose.Schema({
   resetPasswordExpire: { type: Date },
   
   // Login Lockout
-  loginAttempts: { type: Number, required: true, default: 0 },
+  loginAttempts: { type: Number, default: 0 },
   lockUntil: { type: Date },
   
   // Session Invalidation
   tokenVersion: { type: Number, default: 0 }
 });
 
-// Hash password and sanitize numeric fields before saving
+// Hash password and sanitize fields before saving
 UserSchema.pre("save", async function () {
   if (this.email) {
     this.email = String(this.email).toLowerCase().trim();
@@ -42,6 +42,11 @@ UserSchema.pre("save", async function () {
   }
   if (isNaN(this.tokenVersion) || this.tokenVersion == null) {
     this.tokenVersion = 0;
+  }
+  if (!this.role || !['user', 'admin'].includes(String(this.role).toLowerCase())) {
+    this.role = 'user';
+  } else {
+    this.role = String(this.role).toLowerCase();
   }
   if (!this.isModified("password")) return;
   const salt = await bcrypt.genSalt(10);
