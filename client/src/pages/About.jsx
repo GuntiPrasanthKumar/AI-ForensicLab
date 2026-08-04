@@ -3,16 +3,16 @@ import { motion } from "framer-motion";
 
 const About = () => {
   return (
-    <div className="pt-24 pb-20 max-w-4xl mx-auto px-4 md:px-8 min-h-screen">
+    <div className="pt-24 pb-20 max-w-4xl mx-auto px-4 md:px-8 min-h-screen w-full max-w-full overflow-x-hidden">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-16"
+        className="text-center mb-12 sm:mb-16"
       >
-        <div className="inline-flex p-4 bg-blue-600/20 rounded-3xl mb-6">
-          <ShieldAlert size={48} className="text-blue-500" />
+        <div className="inline-flex p-3 sm:p-4 bg-blue-600/20 rounded-3xl mb-4 sm:mb-6">
+          <ShieldAlert size={40} className="text-blue-500" />
         </div>
-        <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+        <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white mb-4 sm:mb-6 tracking-tight">
           About AI Forensic Lab
         </h1>
         <p className="text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto">

@@ -32,8 +32,17 @@ const UserSchema = new mongoose.Schema({
   tokenVersion: { type: Number, default: 0 }
 });
 
-// Hash password before saving
+// Hash password and sanitize numeric fields before saving
 UserSchema.pre("save", async function () {
+  if (this.email) {
+    this.email = String(this.email).toLowerCase().trim();
+  }
+  if (isNaN(this.loginAttempts) || this.loginAttempts == null) {
+    this.loginAttempts = 0;
+  }
+  if (isNaN(this.tokenVersion) || this.tokenVersion == null) {
+    this.tokenVersion = 0;
+  }
   if (!this.isModified("password")) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);

@@ -5,7 +5,7 @@ const AuditLogSchema = new mongoose.Schema({
   email: { type: String }, // Useful if login fails and no user exists
   action: { 
     type: String, 
-    enum: ['LOGIN_SUCCESS', 'LOGIN_FAILED', 'ACCOUNT_LOCKED', 'PASSWORD_RESET', 'EMAIL_VERIFIED'],
+    enum: ['LOGIN_SUCCESS', 'LOGIN_FAILED', 'ACCOUNT_LOCKED', 'PASSWORD_RESET', 'EMAIL_VERIFIED', 'REGISTER_ATTEMPT', 'OTP_RESENT'],
     required: true
   },
   ipAddress: { type: String },

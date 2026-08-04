@@ -93,21 +93,21 @@ const VideoLab = () => {
   };
 
   return (
-    <div className="pt-24 pb-12 max-w-6xl mx-auto px-4 md:px-8 min-h-screen">
+    <div className="pt-24 pb-12 max-w-6xl mx-auto px-4 md:px-8 min-h-screen w-full max-w-full overflow-x-hidden">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
-          <Video className="text-red-500" /> Deepfake Video Lab
+        <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+          <Video className="text-red-500 shrink-0" /> Deepfake Video Lab
         </h1>
-        <p className="text-gray-400 mt-2">Upload footage to analyze facial morphing and edge-blending aspect ratios.</p>
+        <p className="text-xs sm:text-sm text-gray-400 mt-2">Upload footage to analyze facial morphing and edge-blending aspect ratios.</p>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8">
         <section className="space-y-6">
-          <div className="glass-card p-6 rounded-3xl animate-glow">
+          <div className="glass-card p-4 sm:p-6 rounded-3xl animate-glow">
             <div 
               onDragOver={handleDragOver}
               onDrop={handleDrop}
-              className="border-2 border-dashed border-white/10 rounded-2xl p-8 text-center hover:border-red-500/50 transition-all cursor-pointer relative min-h-[300px] flex flex-col items-center justify-center overflow-hidden group"
+              className="border-2 border-dashed border-white/10 rounded-2xl p-4 sm:p-8 text-center hover:border-red-500/50 transition-all cursor-pointer relative min-h-[250px] sm:min-h-[300px] flex flex-col items-center justify-center overflow-hidden group"
             >
               {preview ? (
                 <>
@@ -125,9 +125,9 @@ const VideoLab = () => {
                 </>
               ) : (
                 <>
-                  <Video className="mx-auto mb-4 text-gray-500" size={48} />
-                  <p className="text-gray-300 font-medium text-lg">Drop a video here</p>
-                  <p className="text-gray-500 text-sm mt-2">MP4, MOV supported. (Max 50MB)</p>
+                  <Video className="mx-auto mb-4 text-gray-500 shrink-0" size={40} />
+                  <p className="text-gray-300 font-medium text-base sm:text-lg">Drop a video here</p>
+                  <p className="text-gray-500 text-xs sm:text-sm mt-2">MP4, MOV supported. (Max 50MB)</p>
                 </>
               )}
               <input 
@@ -143,7 +143,7 @@ const VideoLab = () => {
             
             {file && <p className="text-xs text-gray-500 text-center truncate px-4 mt-4">{file.name}</p>}
             
-            <div className="flex gap-4 mt-6">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6">
               <button 
                 disabled={loading}
                 onClick={() => {

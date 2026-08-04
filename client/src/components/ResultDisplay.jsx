@@ -34,12 +34,12 @@ const ResultDisplay = ({ result }) => {
       </div>
 
       {/* Main Probability Card */}
-      <div className="glass-card p-8 rounded-3xl relative overflow-hidden">
+      <div className="glass-card p-5 sm:p-8 rounded-3xl relative overflow-hidden">
         <div className={`absolute top-0 right-0 w-24 h-24 blur-3xl opacity-20 ${result.aiProbability > 50 || result.morphProbability > 50 ? 'bg-red-500' : 'bg-green-500'}`} />
         
-        <div className="flex justify-between items-start mb-8">
+        <div className="flex justify-between items-start mb-6 sm:mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-white">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white">
               {result.inputType === 'image' || result.inputType === 'video' ? (
                 result.morphProbability > result.aiProbability ? `${result.morphProbability}% Morph Likely` : `${result.aiProbability}% AI Likely`
               ) : (
@@ -50,7 +50,7 @@ const ResultDisplay = ({ result }) => {
               {result.confidence} Confidence
             </div>
           </div>
-          <TrendingUp className="text-blue-500" size={32} />
+          <TrendingUp className="text-blue-500 shrink-0" size={28} />
         </div>
 
         <div className="h-4 bg-white/5 rounded-full overflow-hidden mb-8">
@@ -65,21 +65,21 @@ const ResultDisplay = ({ result }) => {
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
             <p className="text-gray-500 text-xs uppercase mb-1">Human Score</p>
-            <p className="text-xl font-semibold text-green-400">{result.humanProbability}%</p>
+            <p className="text-lg sm:text-xl font-semibold text-green-400">{result.humanProbability}%</p>
           </div>
           <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
             <p className="text-gray-500 text-xs uppercase mb-1">{(result.inputType === 'image' || result.inputType === 'video') && result.morphProbability > 0 ? 'Morph Score' : 'AI Score'}</p>
-            <p className="text-xl font-semibold text-red-400">{Math.max(result.aiProbability, result.morphProbability)}%</p>
+            <p className="text-lg sm:text-xl font-semibold text-red-400">{Math.max(result.aiProbability, result.morphProbability)}%</p>
           </div>
         </div>
       </div>
 
       {/* AI Explanation */}
-      <div className="glass-card p-6 rounded-3xl border-l-4 border-blue-500">
-        <h3 className="text-sm font-bold text-blue-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+      <div className="glass-card p-5 sm:p-6 rounded-3xl border-l-4 border-blue-500">
+        <h3 className="text-xs sm:text-sm font-bold text-blue-400 uppercase tracking-widest mb-3 flex items-center gap-2">
           <BrainCircuit size={16} /> Forensic Reasoning
         </h3>
-        <p className="text-gray-300 leading-relaxed italic">
+        <p className="text-gray-300 text-sm sm:text-base leading-relaxed italic">
           "{result.explanation}"
         </p>
       </div>
@@ -90,7 +90,7 @@ const ResultDisplay = ({ result }) => {
       )}
 
       {/* Reasons / Artifacts List */}
-      <div className="glass-card p-6 rounded-3xl">
+      <div className="glass-card p-5 sm:p-6 rounded-3xl">
         <h3 className="text-sm font-medium text-gray-400 mb-4 uppercase">
           {result.inputType === 'image' ? 'Detected Artifacts' : 'Key Observations'}
         </h3>

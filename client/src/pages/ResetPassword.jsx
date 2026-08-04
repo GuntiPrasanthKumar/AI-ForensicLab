@@ -145,26 +145,26 @@ const ResetPassword = () => {
   // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen flex items-center justify-center pt-20 px-4">
-      <div className="w-full max-w-md relative z-10 glass-card p-8 rounded-3xl animate-glow">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden flex items-center justify-center pt-24 pb-12 px-4 relative">
+      <div className="w-full max-w-md relative z-10 glass-card p-5 sm:p-8 rounded-3xl animate-glow">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
-            <ShieldCheck className="text-amber-400" size={32} />
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
+            <ShieldCheck className="text-amber-400" size={28} />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
             {step === "otp" ? "Verify Reset Code" : "Create New Password"}
           </h1>
-          <p className="text-sm text-gray-400 mt-2 flex items-center justify-center gap-1">
-            <Mail size={14} className="text-gray-500" />
-            Code sent to <span className="text-white font-medium">{email}</span>
+          <p className="text-xs sm:text-sm text-gray-400 mt-2 flex items-center justify-center gap-1 flex-wrap">
+            <Mail size={14} className="text-gray-500 shrink-0" />
+            Code sent to <span className="text-white font-medium truncate max-w-[200px] inline-block">{email}</span>
           </p>
         </div>
 
         {/* Step 1: OTP verification */}
         {step === "otp" && (
-          <form onSubmit={handleVerifyOtp} className="space-y-6">
-            <div className="flex justify-between gap-2" onPaste={handlePaste}>
+          <form onSubmit={handleVerifyOtp} className="space-y-5 sm:space-y-6">
+            <div className="flex justify-between gap-1.5 sm:gap-2 w-full" onPaste={handlePaste}>
               {otp.map((digit, i) => (
                 <input
                   key={i}
@@ -175,19 +175,19 @@ const ResetPassword = () => {
                   value={digit}
                   onChange={(e) => handleChange(i, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(i, e)}
-                  className="w-12 h-14 text-center text-xl font-bold bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
+                  className="w-9 sm:w-12 h-11 sm:h-14 text-center text-lg sm:text-xl font-bold bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all min-w-0 shrink"
                   autoFocus={i === 0}
                 />
               ))}
             </div>
 
-            {error && <div className="text-sm text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20 text-center">{error}</div>}
-            {message && <div className="text-sm text-green-400 bg-green-500/10 p-3 rounded-lg border border-green-500/20 text-center">{message}</div>}
+            {error && <div className="text-xs sm:text-sm text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20 text-center">{error}</div>}
+            {message && <div className="text-xs sm:text-sm text-green-400 bg-green-500/10 p-3 rounded-lg border border-green-500/20 text-center">{message}</div>}
 
             <button
               type="submit"
               disabled={loading || otp.join("").length !== 6}
-              className="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+              className="w-full py-3 sm:py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm sm:text-base rounded-xl transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
             >
               {loading ? "Verifying..." : "Verify Code"}
             </button>
@@ -196,11 +196,11 @@ const ResetPassword = () => {
 
         {/* Step 2: New password */}
         {step === "password" && (
-          <form onSubmit={handleResetPassword} className="space-y-6">
+          <form onSubmit={handleResetPassword} className="space-y-5 sm:space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">New Password</label>
+              <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">New Password</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-3.5 sm:pl-4 flex items-center pointer-events-none">
                   <Lock size={18} className="text-gray-500" />
                 </div>
                 <input
@@ -208,7 +208,7 @@ const ResetPassword = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 sm:py-3 pl-10 sm:pl-11 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                   placeholder="••••••••"
                   minLength={6}
                 />
@@ -216,9 +216,9 @@ const ResetPassword = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+              <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-3.5 sm:pl-4 flex items-center pointer-events-none">
                   <Lock size={18} className="text-gray-500" />
                 </div>
                 <input
@@ -226,20 +226,20 @@ const ResetPassword = () => {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 sm:py-3 pl-10 sm:pl-11 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                   placeholder="••••••••"
                   minLength={6}
                 />
               </div>
             </div>
 
-            {error && <div className="text-sm text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20">{error}</div>}
-            {message && <div className="text-sm text-green-400 bg-green-500/10 p-3 rounded-lg border border-green-500/20">{message}</div>}
+            {error && <div className="text-xs sm:text-sm text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20">{error}</div>}
+            {message && <div className="text-xs sm:text-sm text-green-400 bg-green-500/10 p-3 rounded-lg border border-green-500/20">{message}</div>}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm sm:text-base rounded-xl transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Resetting..." : "Reset Password"}
             </button>
@@ -247,7 +247,7 @@ const ResetPassword = () => {
         )}
 
         {/* Footer */}
-        <div className="mt-6 pt-6 border-t border-white/10 flex items-center justify-between text-sm">
+        <div className="mt-6 pt-6 border-t border-white/10 flex items-center justify-between text-xs sm:text-sm">
           <Link to="/forgot-password" className="text-gray-400 hover:text-white flex items-center gap-1 transition-colors">
             <ArrowLeft size={16} /> Try different email
           </Link>

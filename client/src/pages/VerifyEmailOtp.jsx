@@ -105,21 +105,21 @@ const VerifyEmailOtp = () => {
   };
 
   return (
-    <div className="pt-24 pb-12 min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-md glass-card p-8 rounded-3xl animate-glow">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.2)]">
-            <ShieldCheck className="text-blue-400" size={32} />
+    <div className="pt-24 pb-12 min-h-screen w-full max-w-full overflow-x-hidden flex items-center justify-center px-4 relative">
+      <div className="w-full max-w-md glass-card p-5 sm:p-8 rounded-3xl animate-glow">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+            <ShieldCheck className="text-blue-400" size={28} />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Verify Your Email</h1>
-          <p className="text-sm text-gray-400 mt-2 flex items-center justify-center gap-1">
-            <Mail size={14} className="text-gray-500" />
-            Code sent to <span className="text-white font-medium">{email}</span>
+          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Verify Your Email</h1>
+          <p className="text-xs sm:text-sm text-gray-400 mt-2 flex items-center justify-center gap-1 flex-wrap">
+            <Mail size={14} className="text-gray-500 shrink-0" />
+            Code sent to <span className="text-white font-medium truncate max-w-[200px] inline-block">{email}</span>
           </p>
         </div>
 
-        <form onSubmit={handleVerify} className="space-y-6">
-          <div className="flex justify-between gap-2" onPaste={handlePaste}>
+        <form onSubmit={handleVerify} className="space-y-5 sm:space-y-6">
+          <div className="flex justify-between gap-1.5 sm:gap-2 w-full" onPaste={handlePaste}>
             {otp.map((digit, i) => (
               <input
                 key={i}
@@ -130,25 +130,25 @@ const VerifyEmailOtp = () => {
                 value={digit}
                 onChange={(e) => handleChange(i, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(i, e)}
-                className="w-12 h-14 text-center text-xl font-bold bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+                className="w-9 sm:w-12 h-11 sm:h-14 text-center text-lg sm:text-xl font-bold bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all min-w-0 shrink"
                 autoFocus={i === 0}
               />
             ))}
           </div>
 
-          {error && <div className="text-sm text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20 text-center">{error}</div>}
-          {message && <div className="text-sm text-green-400 bg-green-500/10 p-3 rounded-lg border border-green-500/20 text-center">{message}</div>}
+          {error && <div className="text-xs sm:text-sm text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20 text-center">{error}</div>}
+          {message && <div className="text-xs sm:text-sm text-green-400 bg-green-500/10 p-3 rounded-lg border border-green-500/20 text-center">{message}</div>}
 
           <button
             type="submit"
             disabled={loading || otp.join("").length !== 6}
-            className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+            className="w-full py-3 sm:py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm sm:text-base rounded-xl transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
           >
             {loading ? "Verifying..." : "Verify & Continue"}
           </button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-white/10 flex items-center justify-between text-sm">
+        <div className="mt-6 pt-6 border-t border-white/10 flex items-center justify-between text-xs sm:text-sm">
           <Link to="/register" className="text-gray-400 hover:text-white flex items-center gap-1 transition-colors">
             <ArrowLeft size={16} /> Back to Register
           </Link>

@@ -1,6 +1,6 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, AuthContext } from "./context/AuthContext";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Landing from "./pages/Landing";
@@ -14,6 +14,14 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyEmailOtp from "./pages/VerifyEmailOtp";
 
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
+
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
   if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-white">Loading...</div>;
@@ -24,9 +32,10 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-black text-white flex flex-col font-sans">
+        <ScrollToTop />
+        <div className="min-h-screen w-full max-w-full overflow-x-hidden relative bg-black text-white flex flex-col font-sans">
           <Navbar />
-          <div className="flex-grow">
+          <div className="flex-grow w-full max-w-full overflow-x-hidden">
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Auth />} />

@@ -71,18 +71,18 @@ const TextLab = () => {
   const sampleHumanText = "I went to the store yesterday and ran into an old friend from high school. We ended up chatting for like an hour near the coffee section, totally forgetting what I originally came to buy!";
 
   return (
-    <div className="pt-24 pb-12 max-w-6xl mx-auto px-4 md:px-8 min-h-screen">
+    <div className="pt-24 pb-12 max-w-6xl mx-auto px-4 md:px-8 min-h-screen w-full max-w-full overflow-x-hidden">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
-          <FileText className="text-purple-500" /> Linguistics Lab
+        <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+          <FileText className="text-purple-500 shrink-0" /> Linguistics Lab
         </h1>
-        <p className="text-gray-400 mt-2">Paste text or essays to identify LLM burstiness and predictable perplexity.</p>
+        <p className="text-xs sm:text-sm text-gray-400 mt-2">Paste text or essays to identify LLM burstiness and predictable perplexity.</p>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8">
         <section className="space-y-6">
-          <div className="glass-card p-6 rounded-3xl animate-glow">
-            <div className="flex items-center gap-2 mb-4">
+          <div className="glass-card p-4 sm:p-6 rounded-3xl animate-glow">
+            <div className="flex flex-wrap items-center gap-2 mb-4">
               <span className="text-xs text-gray-400">Load sample:</span>
               <button 
                 disabled={loading}
@@ -102,7 +102,7 @@ const TextLab = () => {
             
             <TextInput text={text} setText={setText} onAnalyze={handleAnalyze} loading={loading} />
             
-            <div className="flex gap-4 mt-6">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6">
               <button 
                 disabled={loading}
                 onClick={() => {

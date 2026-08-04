@@ -22,9 +22,13 @@ const verifyTurnstile = require("../utils/turnstile");
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "ai_detector_secret_123";
 
-// Helper to set cookie
+// Helper to set cookie safely
 const sendTokenCookie = (res, user) => {
-  const payload = { userId: user.id, role: user.role, tokenVersion: user.tokenVersion };
+  const payload = { 
+    userId: user.id || user._id, 
+    role: user.role || "user", 
+    tokenVersion: user.tokenVersion || 0 
+  };
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
   
   res.cookie("token", token, {
@@ -33,6 +37,15 @@ const sendTokenCookie = (res, user) => {
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
   });
+};
+
+// Safe audit logging helper — never crashes authentication flow if audit log fails
+const safeAuditLog = async (data) => {
+  try {
+    await AuditLog.create(data);
+  } catch (err) {
+    console.error("[AUDIT LOG ERROR] Non-fatal audit log failure:", err.message);
+  }
 };
 
 // ─── Helper: send registration verification OTP email ────────────────────────
@@ -122,6 +135,7 @@ router.post("/register", authLimiter, async (req, res) => {
     // 6. Send OTP email
     try {
       await sendVerificationOtp(user, otp);
+      await safeAuditLog({ userId: user.id, action: "REGISTER_ATTEMPT", ipAddress: req.ip });
       return res.status(201).json({
         message: "Verification code sent to your email.",
         requiresEmailVerification: true,
@@ -130,14 +144,14 @@ router.post("/register", authLimiter, async (req, res) => {
     } catch (error) {
       // Clean up user if email fails
       await User.findByIdAndDelete(user._id);
-      console.error("[AUTH] REGISTER EMAIL FAILED — user cleaned up:", error.message);
+      console.error("[AUTH] REGISTER EMAIL FAILED — user cleaned up:", error.stack || error.message);
       return res.status(503).json({
         message: `Could not send verification email. Please try again. (${error.message})`,
       });
     }
   } catch (err) {
-    console.error("[AUTH] REGISTER ERROR:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("[AUTH] REGISTER ERROR Stack:", err.stack || err);
+    res.status(500).json({ message: "Server error: Unable to process registration" });
   }
 });
 
@@ -154,14 +168,15 @@ router.post("/verify-otp", otpLimiter, async (req, res) => {
       return res.status(400).json({ message: "Email and verification code are required." });
     }
 
-    const user = await User.findOne({ email });
+    const cleanEmail = String(email).toLowerCase().trim();
+    const user = await User.findOne({ email: cleanEmail });
     if (!user) {
-      console.log("[AUTH] Verify OTP — user not found:", email);
+      console.log("[AUTH] Verify OTP — user not found:", cleanEmail);
       return res.status(400).json({ message: "Invalid verification code." });
     }
 
     if (user.isVerified) {
-      console.log("[AUTH] Already verified:", email);
+      console.log("[AUTH] Already verified:", cleanEmail);
       sendTokenCookie(res, user);
       return res.json({
         message: "Email already verified.",
@@ -178,16 +193,16 @@ router.post("/verify-otp", otpLimiter, async (req, res) => {
     user.verificationToken = undefined;
     await user.save();
 
-    console.log("[AUTH] Email verified successfully:", email);
-    await AuditLog.create({ userId: user.id, action: "EMAIL_VERIFIED", ipAddress: req.ip });
+    console.log("[AUTH] Email verified successfully:", cleanEmail);
+    await safeAuditLog({ userId: user.id, action: "EMAIL_VERIFIED", ipAddress: req.ip });
     sendTokenCookie(res, user);
     res.json({
       message: "Email verified successfully.",
       user: { id: user.id, name: user.name, email: user.email, role: user.role },
     });
   } catch (err) {
-    console.error("[AUTH] VERIFY OTP ERROR:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("[AUTH] VERIFY OTP ERROR Stack:", err.stack || err);
+    res.status(500).json({ message: "Server error: Unable to verify OTP" });
   }
 });
 
@@ -204,7 +219,8 @@ router.post("/resend-otp", otpLimiter, async (req, res) => {
       return res.status(503).json({ message: "Email service is not configured on the server." });
     }
 
-    const user = await User.findOne({ email });
+    const cleanEmail = String(email).toLowerCase().trim();
+    const user = await User.findOne({ email: cleanEmail });
     const genericMsg = "If an unverified account exists, a new code has been sent.";
     if (!user || user.isVerified) {
       return res.json({ message: genericMsg });
@@ -212,7 +228,7 @@ router.post("/resend-otp", otpLimiter, async (req, res) => {
 
     // Server-side cooldown: refuse if last OTP was sent < 30s ago
     if (user.emailOtpExpire && new Date(user.emailOtpExpire) > new Date(Date.now() + 9.5 * 60 * 1000)) {
-      console.log("[AUTH] Resend too soon for:", email);
+      console.log("[AUTH] Resend too soon for:", cleanEmail);
       return res.status(429).json({ message: "Please wait before requesting another code." });
     }
 
@@ -222,8 +238,9 @@ router.post("/resend-otp", otpLimiter, async (req, res) => {
 
     try {
       await sendVerificationOtp(user, otp);
+      await safeAuditLog({ userId: user.id, action: "OTP_RESENT", ipAddress: req.ip });
     } catch (error) {
-      console.error("[AUTH] RESEND OTP EMAIL ERROR:", error.message);
+      console.error("[AUTH] RESEND OTP EMAIL ERROR:", error.stack || error.message);
       return res.status(503).json({
         message: "Could not send verification email. Please try again later.",
         details: process.env.NODE_ENV === "development" ? error.message : undefined,
@@ -232,8 +249,8 @@ router.post("/resend-otp", otpLimiter, async (req, res) => {
 
     res.json({ message: genericMsg, email: user.email });
   } catch (err) {
-    console.error("[AUTH] RESEND OTP ERROR:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("[AUTH] RESEND OTP ERROR Stack:", err.stack || err);
+    res.status(500).json({ message: "Server error: Unable to resend code" });
   }
 });
 
@@ -259,30 +276,31 @@ router.post("/login", authLimiter, async (req, res) => {
       return res.status(400).json({ message: `CAPTCHA verification failed [${codes}]. (Backend Secret: ${maskedSecret})` });
     }
 
-    const user = await User.findOne({ email });
+    const cleanEmail = email ? String(email).toLowerCase().trim() : "";
+    const user = await User.findOne({ email: cleanEmail });
     
     // Generic error
     const invalidCredentialsMsg = "Invalid credentials";
     
     if (!user) {
-      await AuditLog.create({ email, action: 'LOGIN_FAILED', ipAddress: req.ip });
+      await safeAuditLog({ email: cleanEmail, action: 'LOGIN_FAILED', ipAddress: req.ip });
       return res.status(400).json({ message: invalidCredentialsMsg });
     }
 
     // Check Lockout
     if (user.lockUntil && user.lockUntil > Date.now()) {
-      await AuditLog.create({ userId: user.id, action: 'ACCOUNT_LOCKED', ipAddress: req.ip });
+      await safeAuditLog({ userId: user.id, action: 'ACCOUNT_LOCKED', ipAddress: req.ip });
       return res.status(403).json({ message: "Account locked. Please try again later or reset password." });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      user.loginAttempts += 1;
+      user.loginAttempts = (user.loginAttempts || 0) + 1;
       if (user.loginAttempts >= 5) {
         user.lockUntil = Date.now() + 15 * 60 * 1000; // Lock for 15 mins
       }
       await user.save();
-      await AuditLog.create({ userId: user.id, action: 'LOGIN_FAILED', ipAddress: req.ip });
+      await safeAuditLog({ userId: user.id, action: 'LOGIN_FAILED', ipAddress: req.ip });
       return res.status(400).json({ message: invalidCredentialsMsg });
     }
 
@@ -299,13 +317,13 @@ router.post("/login", authLimiter, async (req, res) => {
     user.lockUntil = undefined;
     await user.save();
 
-    console.log("[AUTH] Login successful:", email);
-    await AuditLog.create({ userId: user.id, action: 'LOGIN_SUCCESS', ipAddress: req.ip });
+    console.log("[AUTH] Login successful:", cleanEmail);
+    await safeAuditLog({ userId: user.id, action: 'LOGIN_SUCCESS', ipAddress: req.ip });
     sendTokenCookie(res, user);
     res.json({ user: { id: user.id, name: user.name, email: user.email, role: user.role } });
   } catch (err) {
-    console.error("[AUTH] LOGIN ERROR:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("[AUTH] LOGIN ERROR Stack:", err.stack || err);
+    res.status(500).json({ message: "Server error: Unable to log in" });
   }
 });
 
@@ -326,17 +344,18 @@ router.post("/forgot-password", authLimiter, async (req, res) => {
       return res.status(503).json({ message: "Email service is not configured on the server." });
     }
 
-    const user = await User.findOne({ email });
+    const cleanEmail = String(email).toLowerCase().trim();
+    const user = await User.findOne({ email: cleanEmail });
     
     // Always return success to prevent email enumeration
     if (!user) {
-      console.log("[AUTH] Forgot password — no account for:", email);
+      console.log("[AUTH] Forgot password — no account for:", cleanEmail);
       return res.json({ message: "If an account with that email exists, a reset code has been sent.", sent: true });
     }
 
     // Server-side cooldown: refuse if last reset OTP was sent < 30s ago
     if (user.resetOtpExpire && new Date(user.resetOtpExpire) > new Date(Date.now() + 9.5 * 60 * 1000)) {
-      console.log("[AUTH] Forgot password cooldown for:", email);
+      console.log("[AUTH] Forgot password cooldown for:", cleanEmail);
       return res.json({ message: "If an account with that email exists, a reset code has been sent.", sent: true });
     }
 
@@ -346,9 +365,9 @@ router.post("/forgot-password", authLimiter, async (req, res) => {
 
     try {
       await sendResetOtpEmail(user, otp);
-      console.log("[AUTH] Reset OTP sent for:", email);
+      console.log("[AUTH] Reset OTP sent for:", cleanEmail);
     } catch (error) {
-      console.error("[AUTH] FORGOT PASSWORD EMAIL FAILED:", error.message);
+      console.error("[AUTH] FORGOT PASSWORD EMAIL FAILED:", error.stack || error.message);
       // Clear the OTP since email failed
       clearResetOtpFields(user);
       await user.save();
@@ -359,8 +378,8 @@ router.post("/forgot-password", authLimiter, async (req, res) => {
 
     res.json({ message: "If an account with that email exists, a reset code has been sent.", sent: true });
   } catch (err) {
-    console.error("[AUTH] FORGOT PASSWORD ERROR:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("[AUTH] FORGOT PASSWORD ERROR Stack:", err.stack || err);
+    res.status(500).json({ message: "Server error: Unable to process reset request" });
   }
 });
 
@@ -377,7 +396,8 @@ router.post("/verify-reset-otp", otpLimiter, async (req, res) => {
       return res.status(400).json({ message: "Email and reset code are required." });
     }
 
-    const user = await User.findOne({ email });
+    const cleanEmail = String(email).toLowerCase().trim();
+    const user = await User.findOne({ email: cleanEmail });
     if (!user) {
       return res.status(400).json({ message: "Invalid or expired reset code." });
     }
@@ -386,13 +406,11 @@ router.post("/verify-reset-otp", otpLimiter, async (req, res) => {
       return res.status(400).json({ message: "Invalid or expired reset code." });
     }
 
-    console.log("[AUTH] Reset OTP verified for:", email);
-    // Don't clear the OTP yet — it will be validated again during password reset
-    // But mark it as verified by storing a short-lived flag
+    console.log("[AUTH] Reset OTP verified for:", cleanEmail);
     res.json({ message: "Reset code verified. You can now set a new password.", verified: true });
   } catch (err) {
-    console.error("[AUTH] VERIFY RESET OTP ERROR:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("[AUTH] VERIFY RESET OTP ERROR Stack:", err.stack || err);
+    res.status(500).json({ message: "Server error: Unable to verify reset code" });
   }
 });
 
@@ -413,7 +431,8 @@ router.post("/reset-password", otpLimiter, async (req, res) => {
       return res.status(400).json({ message: "Password must be at least 6 characters." });
     }
 
-    const user = await User.findOne({ email });
+    const cleanEmail = String(email).toLowerCase().trim();
+    const user = await User.findOne({ email: cleanEmail });
     if (!user) {
       return res.status(400).json({ message: "Invalid or expired reset code." });
     }
@@ -425,19 +444,19 @@ router.post("/reset-password", otpLimiter, async (req, res) => {
     // Update password
     user.password = password;
     clearResetOtpFields(user);
-    user.tokenVersion += 1; // Invalidate all existing sessions
+    user.tokenVersion = (user.tokenVersion || 0) + 1; // Invalidate all existing sessions
     // Reset lockout on password change
     user.loginAttempts = 0;
     user.lockUntil = undefined;
     await user.save();
     
-    console.log("[AUTH] Password reset successful for:", email);
-    await AuditLog.create({ userId: user.id, action: 'PASSWORD_RESET', ipAddress: req.ip });
+    console.log("[AUTH] Password reset successful for:", cleanEmail);
+    await safeAuditLog({ userId: user.id, action: 'PASSWORD_RESET', ipAddress: req.ip });
 
     res.json({ message: "Password updated successfully. Please log in with your new password." });
   } catch (err) {
-    console.error("[AUTH] RESET PASSWORD ERROR:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("[AUTH] RESET PASSWORD ERROR Stack:", err.stack || err);
+    res.status(500).json({ message: "Server error: Unable to reset password" });
   }
 });
 
@@ -458,7 +477,8 @@ router.post("/resend-reset-otp", otpLimiter, async (req, res) => {
       return res.status(400).json({ message: "Email is required." });
     }
 
-    const user = await User.findOne({ email });
+    const cleanEmail = String(email).toLowerCase().trim();
+    const user = await User.findOne({ email: cleanEmail });
     const genericMsg = "If an account with that email exists, a new reset code has been sent.";
     if (!user) {
       return res.json({ message: genericMsg });
@@ -466,7 +486,7 @@ router.post("/resend-reset-otp", otpLimiter, async (req, res) => {
 
     // Server-side cooldown: refuse if last reset OTP was sent < 30s ago
     if (user.resetOtpExpire && new Date(user.resetOtpExpire) > new Date(Date.now() + 9.5 * 60 * 1000)) {
-      console.log("[AUTH] Resend reset OTP too soon for:", email);
+      console.log("[AUTH] Resend reset OTP too soon for:", cleanEmail);
       return res.status(429).json({ message: "Please wait before requesting another code." });
     }
 
@@ -477,14 +497,14 @@ router.post("/resend-reset-otp", otpLimiter, async (req, res) => {
     try {
       await sendResetOtpEmail(user, otp);
     } catch (error) {
-      console.error("[AUTH] RESEND RESET OTP EMAIL ERROR:", error.message);
+      console.error("[AUTH] RESEND RESET OTP EMAIL ERROR:", error.stack || error.message);
       return res.status(503).json({ message: "Could not send reset email. Please try again later." });
     }
 
     res.json({ message: genericMsg });
   } catch (err) {
-    console.error("[AUTH] RESEND RESET OTP ERROR:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("[AUTH] RESEND RESET OTP ERROR Stack:", err.stack || err);
+    res.status(500).json({ message: "Server error: Unable to resend reset code" });
   }
 });
 
@@ -512,6 +532,7 @@ router.get("/me", authMiddleware, async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user);
   } catch (err) {
+    console.error("[AUTH] GET ME ERROR Stack:", err.stack || err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -531,11 +552,12 @@ router.delete("/delete", authMiddleware, async (req, res) => {
       const Result = require("../models/Result");
       await Result.deleteMany({ user: req.user.userId });
     } catch (_) { /* Result model not available */ }
-    await AuditLog.deleteMany({ userId: req.user.userId });
+    await safeAuditLog({ email: user.email, action: 'PASSWORD_RESET', ipAddress: req.ip });
 
     res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "none" });
     res.json({ message: "User deleted" });
   } catch (err) {
+    console.error("[AUTH] DELETE USER ERROR Stack:", err.stack || err);
     res.status(500).json({ message: "Server error" });
   }
 });

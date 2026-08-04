@@ -40,37 +40,37 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+const axios = require("axios");
+
 async function sendViaResend({ email, subject, message, html }) {
   const from = process.env.EMAIL_FROM || "AI Forensic Lab <onboarding@resend.dev>";
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
-
   console.log("[EMAIL] Resend: sending to", email, "| Subject:", subject);
 
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      to: [email],
-      subject,
-      text: message,
-      html: html || undefined,
-    }),
-    signal: controller.signal,
-  });
-  clearTimeout(timeout);
-
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    console.error("[EMAIL] Resend API error:", response.status, data);
-    throw new Error(data.message || `Resend API error (${response.status})`);
+  try {
+    const res = await axios.post(
+      "https://api.resend.com/emails",
+      {
+        from,
+        to: [email],
+        subject,
+        text: message,
+        html: html || undefined,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        timeout: 15000,
+      }
+    );
+    console.log("[EMAIL] Resend: sent successfully | ID:", res.data?.id);
+    return res.data;
+  } catch (err) {
+    const errMsg = err.response?.data?.message || err.message;
+    console.error("[EMAIL] Resend API error:", err.response?.status, err.response?.data || err.message);
+    throw new Error(`Resend API error (${err.response?.status || 'network'}): ${errMsg}`);
   }
-  console.log("[EMAIL] Resend: sent successfully | ID:", data.id);
-  return data;
 }
 
 async function sendSmtp({ email, subject, message, html }) {
@@ -104,26 +104,29 @@ async function sendSmtp({ email, subject, message, html }) {
 async function sendViaVercelProxy({ email, subject, message, html }) {
   const proxyUrl = "https://ai-forensic-lab.vercel.app/api/sendEmail";
   console.log("[EMAIL] Gmail (Vercel proxy): sending to", email, "| Subject:", subject);
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 25000);
-  const response = await fetch(proxyUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      to: email,
-      subject,
-      message,
-      html,
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }),
-    signal: controller.signal,
-  });
-  clearTimeout(timeout);
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.message || `Proxy error (${response.status})`);
-  console.log("[EMAIL] Gmail (Vercel proxy): sent successfully");
-  return data;
+  try {
+    const res = await axios.post(
+      proxyUrl,
+      {
+        to: email,
+        subject,
+        message,
+        html,
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      {
+        headers: { "Content-Type": "application/json" },
+        timeout: 25000,
+      }
+    );
+    console.log("[EMAIL] Gmail (Vercel proxy): sent successfully");
+    return res.data;
+  } catch (err) {
+    const errMsg = err.response?.data?.message || err.message;
+    console.error("[EMAIL] Vercel proxy error:", err.response?.status, err.response?.data || err.message);
+    throw new Error(`Proxy error (${err.response?.status || 'network'}): ${errMsg}`);
+  }
 }
 
 async function sendViaGmail(options) {

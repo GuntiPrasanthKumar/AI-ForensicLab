@@ -91,11 +91,15 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api", require("./routes/detect"));
 app.use("/api", require("./routes/history"));
 
-// Ensure CORS headers on error responses too
+// Ensure CORS headers on error responses too & log complete stack traces
 app.use((err, req, res, next) => {
   setCorsHeaders(req, res);
-  const status = err.status || 500;
-  res.status(status).json({ message: err.message || "Server error" });
+  console.error("[GLOBAL SERVER ERROR]:", err.stack || err);
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({
+    message: err.message || "Internal server error",
+    ...(process.env.NODE_ENV === "development" ? { stack: err.stack } : {}),
+  });
 });
 
 app.listen(5000, () => console.log("Server running on port 5000"));

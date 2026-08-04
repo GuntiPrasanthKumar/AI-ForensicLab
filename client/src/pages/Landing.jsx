@@ -44,11 +44,11 @@ class CanvasErrorBoundary extends Component {
 
 const Landing = () => {
   return (
-    <div className="bg-black">
+    <div className="bg-black w-full max-w-full overflow-x-hidden">
       {/* Hero Section - Full Screen */}
-      <div className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden">
+      <div className="relative min-h-screen h-[100dvh] w-full max-w-full flex flex-col items-center justify-center overflow-hidden">
         {/* 3D Background */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 overflow-hidden">
           <CanvasErrorBoundary>
             <Canvas camera={{ position: [0, 0, 1] }}>
               <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
@@ -61,45 +61,45 @@ const Landing = () => {
 
         {/* Content Overlay */}
         <div className="relative z-10 w-full px-4 pt-16">
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-          className="max-w-4xl mx-auto text-center"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 mb-8">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
-            </span>
-            Local Heuristic Engine v2.0 Live
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1 }}
+            className="max-w-4xl mx-auto text-center"
+          >
+            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs sm:text-sm mb-6 sm:mb-8">
+              <span className="relative flex h-2.5 w-2.5 sm:h-3 sm:w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 bg-blue-500"></span>
+              </span>
+              Local Heuristic Engine v2.0 Live
+            </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight leading-tight">
-            Uncover the <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Synthetic</span> Truth
-          </h1>
-          
-          <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Military-grade AI forensics deployed entirely locally. Detect deepfakes, AI-generated text, and synthetic face morphs without compromising privacy.
-          </p>
+            <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-4 sm:mb-6 tracking-tight leading-tight">
+              Uncover the <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Synthetic</span> Truth
+            </h1>
+            
+            <p className="text-sm sm:text-lg md:text-xl text-gray-400 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed">
+              Military-grade AI forensics deployed entirely locally. Detect deepfakes, AI-generated text, and synthetic face morphs without compromising privacy.
+            </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link 
-              to="/login"
-              className="px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-all flex items-center gap-2 group w-full sm:w-auto justify-center"
-            >
-              Start Analyzing <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <a 
-              href="#features"
-              className="px-8 py-4 bg-white/5 border border-white/10 text-white font-medium rounded-full hover:bg-white/10 transition-all w-full sm:w-auto text-center"
-            >
-              How it works
-            </a>
-          </div>
-        </motion.div>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+              <Link 
+                to="/login"
+                className="px-6 sm:px-8 py-3.5 sm:py-4 bg-white text-black font-bold text-sm sm:text-base rounded-full hover:bg-gray-200 transition-all flex items-center gap-2 group w-full sm:w-auto justify-center"
+              >
+                Start Analyzing <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <a 
+                href="#features"
+                className="px-6 sm:px-8 py-3.5 sm:py-4 bg-white/5 border border-white/10 text-white font-medium text-sm sm:text-base rounded-full hover:bg-white/10 transition-all w-full sm:w-auto text-center"
+              >
+                How it works
+              </a>
+            </div>
+          </motion.div>
+        </div>
       </div>
-    </div>
 
       {/* Features Section */}
       <div id="features" className="relative z-10 bg-black/80 backdrop-blur-xl border-t border-white/5 py-24">
