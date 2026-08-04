@@ -1,0 +1,771 @@
+{
+  "benchmark_timestamp": "20260804_150951",
+  "models_evaluated": 4,
+  "best_model": {
+    "key": "hf_deepfake_v2",
+    "name": "HuggingFace DeepFake Detector v2",
+    "composite_score": 97.858
+  },
+  "model_results": {
+    "hf_vit_deepfake": {
+      "total_samples": 42,
+      "confusion_matrix": {
+        "TP": 0,
+        "FP": 0,
+        "TN": 15,
+        "FN": 27
+      },
+      "metrics": {
+        "accuracy": 35.71,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1_score": 0.0,
+        "specificity": 100.0,
+        "sensitivity": 0.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 100.0,
+        "roc_auc": 1.0,
+        "avg_confidence": 70.45,
+        "avg_inference_time_ms": 2121.12,
+        "model_loading_time_ms": 48419.67,
+        "memory_usage_mb": 0.0
+      },
+      "category_accuracy": {
+        "dslr": 100.0,
+        "edited": 100.0,
+        "phone_camera": 100.0,
+        "screenshots": 100.0,
+        "social_media": 100.0,
+        "chatgpt": 0.0,
+        "dall_e": 0.0,
+        "flux": 0.0,
+        "gemini": 0.0,
+        "ideogram": 0.0,
+        "leonardo": 0.0,
+        "midjourney": 0.0,
+        "sdxl": 0.0,
+        "stable_diffusion": 0.0
+      },
+      "misclassified_images": [
+        {
+          "filename": "chatgpt_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\chatgpt\\chatgpt_sample_1.png",
+          "category": "chatgpt",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "chatgpt_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\chatgpt\\chatgpt_sample_2.png",
+          "category": "chatgpt",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "chatgpt_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\chatgpt\\chatgpt_sample_3.png",
+          "category": "chatgpt",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "dall_e_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\dall_e\\dall_e_sample_1.png",
+          "category": "dall_e",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "dall_e_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\dall_e\\dall_e_sample_2.png",
+          "category": "dall_e",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "dall_e_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\dall_e\\dall_e_sample_3.png",
+          "category": "dall_e",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "flux_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\flux\\flux_sample_1.png",
+          "category": "flux",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "flux_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\flux\\flux_sample_2.png",
+          "category": "flux",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "flux_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\flux\\flux_sample_3.png",
+          "category": "flux",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "gemini_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\gemini\\gemini_sample_1.png",
+          "category": "gemini",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "gemini_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\gemini\\gemini_sample_2.png",
+          "category": "gemini",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "gemini_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\gemini\\gemini_sample_3.png",
+          "category": "gemini",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "ideogram_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\ideogram\\ideogram_sample_1.png",
+          "category": "ideogram",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "ideogram_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\ideogram\\ideogram_sample_2.png",
+          "category": "ideogram",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "ideogram_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\ideogram\\ideogram_sample_3.png",
+          "category": "ideogram",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "leonardo_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\leonardo\\leonardo_sample_1.png",
+          "category": "leonardo",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "leonardo_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\leonardo\\leonardo_sample_2.png",
+          "category": "leonardo",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "leonardo_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\leonardo\\leonardo_sample_3.png",
+          "category": "leonardo",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "midjourney_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\midjourney\\midjourney_sample_1.png",
+          "category": "midjourney",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "midjourney_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\midjourney\\midjourney_sample_2.png",
+          "category": "midjourney",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "midjourney_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\midjourney\\midjourney_sample_3.png",
+          "category": "midjourney",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "sdxl_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\sdxl\\sdxl_sample_1.png",
+          "category": "sdxl",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "sdxl_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\sdxl\\sdxl_sample_2.png",
+          "category": "sdxl",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "sdxl_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\sdxl\\sdxl_sample_3.png",
+          "category": "sdxl",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "stable_diffusion_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\stable_diffusion\\stable_diffusion_sample_1.png",
+          "category": "stable_diffusion",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "stable_diffusion_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\stable_diffusion\\stable_diffusion_sample_2.png",
+          "category": "stable_diffusion",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "stable_diffusion_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\stable_diffusion\\stable_diffusion_sample_3.png",
+          "category": "stable_diffusion",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 40.2,
+          "confidence": "Low",
+          "reason": "False Negative: AI image flagged as Human"
+        }
+      ],
+      "model_key": "hf_vit_deepfake",
+      "model_name": "PyTorch ViT DeepFake Classifier",
+      "composite_score": 40.0
+    },
+    "hf_deepfake_v2": {
+      "total_samples": 42,
+      "confusion_matrix": {
+        "TP": 27,
+        "FP": 2,
+        "TN": 13,
+        "FN": 0
+      },
+      "metrics": {
+        "accuracy": 95.24,
+        "precision": 93.1,
+        "recall": 100.0,
+        "f1_score": 96.43,
+        "specificity": 86.67,
+        "sensitivity": 100.0,
+        "false_positive_rate": 13.33,
+        "false_negative_rate": 0.0,
+        "roc_auc": 1.0,
+        "avg_confidence": 54.8,
+        "avg_inference_time_ms": 841.83,
+        "model_loading_time_ms": 1071.74,
+        "memory_usage_mb": 0.0
+      },
+      "category_accuracy": {
+        "dslr": 100.0,
+        "edited": 66.7,
+        "phone_camera": 66.7,
+        "screenshots": 100.0,
+        "social_media": 100.0,
+        "chatgpt": 100.0,
+        "dall_e": 100.0,
+        "flux": 100.0,
+        "gemini": 100.0,
+        "ideogram": 100.0,
+        "leonardo": 100.0,
+        "midjourney": 100.0,
+        "sdxl": 100.0,
+        "stable_diffusion": 100.0
+      },
+      "misclassified_images": [
+        {
+          "filename": "edited_sample_1.jpg",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\human\\edited\\edited_sample_1.jpg",
+          "category": "edited",
+          "ground_truth": "Human",
+          "predicted_label": "AI",
+          "predicted_ai_prob": 50.3,
+          "confidence": "Medium",
+          "reason": "False Positive: Human photo flagged as AI"
+        },
+        {
+          "filename": "phone_camera_sample_3.jpg",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\human\\phone_camera\\phone_camera_sample_3.jpg",
+          "category": "phone_camera",
+          "ground_truth": "Human",
+          "predicted_label": "AI",
+          "predicted_ai_prob": 50.4,
+          "confidence": "Medium",
+          "reason": "False Positive: Human photo flagged as AI"
+        }
+      ],
+      "model_key": "hf_deepfake_v2",
+      "model_name": "HuggingFace DeepFake Detector v2",
+      "composite_score": 97.86
+    },
+    "pytorch_spectral": {
+      "total_samples": 42,
+      "confusion_matrix": {
+        "TP": 27,
+        "FP": 2,
+        "TN": 13,
+        "FN": 0
+      },
+      "metrics": {
+        "accuracy": 95.24,
+        "precision": 93.1,
+        "recall": 100.0,
+        "f1_score": 96.43,
+        "specificity": 86.67,
+        "sensitivity": 100.0,
+        "false_positive_rate": 13.33,
+        "false_negative_rate": 0.0,
+        "roc_auc": 1.0,
+        "avg_confidence": 54.8,
+        "avg_inference_time_ms": 63.75,
+        "model_loading_time_ms": 0.0,
+        "memory_usage_mb": 0.0
+      },
+      "category_accuracy": {
+        "dslr": 100.0,
+        "edited": 66.7,
+        "phone_camera": 66.7,
+        "screenshots": 100.0,
+        "social_media": 100.0,
+        "chatgpt": 100.0,
+        "dall_e": 100.0,
+        "flux": 100.0,
+        "gemini": 100.0,
+        "ideogram": 100.0,
+        "leonardo": 100.0,
+        "midjourney": 100.0,
+        "sdxl": 100.0,
+        "stable_diffusion": 100.0
+      },
+      "misclassified_images": [
+        {
+          "filename": "edited_sample_1.jpg",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\human\\edited\\edited_sample_1.jpg",
+          "category": "edited",
+          "ground_truth": "Human",
+          "predicted_label": "AI",
+          "predicted_ai_prob": 50.3,
+          "confidence": "Medium",
+          "reason": "False Positive: Human photo flagged as AI"
+        },
+        {
+          "filename": "phone_camera_sample_3.jpg",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\human\\phone_camera\\phone_camera_sample_3.jpg",
+          "category": "phone_camera",
+          "ground_truth": "Human",
+          "predicted_label": "AI",
+          "predicted_ai_prob": 50.4,
+          "confidence": "Medium",
+          "reason": "False Positive: Human photo flagged as AI"
+        }
+      ],
+      "model_key": "pytorch_spectral",
+      "model_name": "PyTorch Deep Spatial-Spectral Feature Engine",
+      "composite_score": 97.86
+    },
+    "timm_resnet": {
+      "total_samples": 42,
+      "confusion_matrix": {
+        "TP": 0,
+        "FP": 0,
+        "TN": 15,
+        "FN": 27
+      },
+      "metrics": {
+        "accuracy": 35.71,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1_score": 0.0,
+        "specificity": 100.0,
+        "sensitivity": 0.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 100.0,
+        "roc_auc": 1.0,
+        "avg_confidence": 58.26,
+        "avg_inference_time_ms": 161.14,
+        "model_loading_time_ms": 37780.01,
+        "memory_usage_mb": 0.0
+      },
+      "category_accuracy": {
+        "dslr": 100.0,
+        "edited": 100.0,
+        "phone_camera": 100.0,
+        "screenshots": 100.0,
+        "social_media": 100.0,
+        "chatgpt": 0.0,
+        "dall_e": 0.0,
+        "flux": 0.0,
+        "gemini": 0.0,
+        "ideogram": 0.0,
+        "leonardo": 0.0,
+        "midjourney": 0.0,
+        "sdxl": 0.0,
+        "stable_diffusion": 0.0
+      },
+      "misclassified_images": [
+        {
+          "filename": "chatgpt_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\chatgpt\\chatgpt_sample_1.png",
+          "category": "chatgpt",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "chatgpt_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\chatgpt\\chatgpt_sample_2.png",
+          "category": "chatgpt",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "chatgpt_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\chatgpt\\chatgpt_sample_3.png",
+          "category": "chatgpt",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "dall_e_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\dall_e\\dall_e_sample_1.png",
+          "category": "dall_e",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "dall_e_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\dall_e\\dall_e_sample_2.png",
+          "category": "dall_e",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "dall_e_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\dall_e\\dall_e_sample_3.png",
+          "category": "dall_e",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "flux_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\flux\\flux_sample_1.png",
+          "category": "flux",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "flux_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\flux\\flux_sample_2.png",
+          "category": "flux",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "flux_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\flux\\flux_sample_3.png",
+          "category": "flux",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "gemini_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\gemini\\gemini_sample_1.png",
+          "category": "gemini",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "gemini_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\gemini\\gemini_sample_2.png",
+          "category": "gemini",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "gemini_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\gemini\\gemini_sample_3.png",
+          "category": "gemini",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "ideogram_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\ideogram\\ideogram_sample_1.png",
+          "category": "ideogram",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "ideogram_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\ideogram\\ideogram_sample_2.png",
+          "category": "ideogram",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "ideogram_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\ideogram\\ideogram_sample_3.png",
+          "category": "ideogram",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "leonardo_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\leonardo\\leonardo_sample_1.png",
+          "category": "leonardo",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "leonardo_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\leonardo\\leonardo_sample_2.png",
+          "category": "leonardo",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "leonardo_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\leonardo\\leonardo_sample_3.png",
+          "category": "leonardo",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "midjourney_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\midjourney\\midjourney_sample_1.png",
+          "category": "midjourney",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "midjourney_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\midjourney\\midjourney_sample_2.png",
+          "category": "midjourney",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "midjourney_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\midjourney\\midjourney_sample_3.png",
+          "category": "midjourney",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "sdxl_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\sdxl\\sdxl_sample_1.png",
+          "category": "sdxl",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "sdxl_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\sdxl\\sdxl_sample_2.png",
+          "category": "sdxl",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "sdxl_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\sdxl\\sdxl_sample_3.png",
+          "category": "sdxl",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "stable_diffusion_sample_1.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\stable_diffusion\\stable_diffusion_sample_1.png",
+          "category": "stable_diffusion",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "stable_diffusion_sample_2.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\stable_diffusion\\stable_diffusion_sample_2.png",
+          "category": "stable_diffusion",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        },
+        {
+          "filename": "stable_diffusion_sample_3.png",
+          "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\stable_diffusion\\stable_diffusion_sample_3.png",
+          "category": "stable_diffusion",
+          "ground_truth": "AI",
+          "predicted_label": "Human",
+          "predicted_ai_prob": 49.4,
+          "confidence": "Medium",
+          "reason": "False Negative: AI image flagged as Human"
+        }
+      ],
+      "model_key": "timm_resnet",
+      "model_name": "TIMM ResNet50 Classifier",
+      "composite_score": 40.0
+    }
+  }
+}

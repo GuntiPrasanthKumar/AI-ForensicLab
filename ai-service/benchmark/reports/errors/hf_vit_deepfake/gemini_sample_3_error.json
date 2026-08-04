@@ -1,0 +1,10 @@
+{
+  "filename": "gemini_sample_3.png",
+  "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\gemini\\gemini_sample_3.png",
+  "category": "gemini",
+  "ground_truth": "AI",
+  "predicted_label": "Human",
+  "predicted_ai_prob": 40.2,
+  "confidence": "Low",
+  "reason": "False Negative: AI image flagged as Human"
+}

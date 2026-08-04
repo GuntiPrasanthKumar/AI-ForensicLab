@@ -1,0 +1,5 @@
+Model Key,Model Name,Composite Score,Accuracy (%),Precision (%),Recall (%),F1 Score (%),Specificity (%),FPR (%),FNR (%),ROC-AUC,Avg Time (ms),Memory (MB),TP,FP,TN,FN
+hf_vit_deepfake,PyTorch ViT DeepFake Classifier,40.0,35.71,0.0,0.0,0.0,100.0,0.0,100.0,1.0,2121.12,0.0,0,0,15,27
+hf_deepfake_v2,HuggingFace DeepFake Detector v2,97.86,95.24,93.1,100.0,96.43,86.67,13.33,0.0,1.0,841.83,0.0,27,2,13,0
+pytorch_spectral,PyTorch Deep Spatial-Spectral Feature Engine,97.86,95.24,93.1,100.0,96.43,86.67,13.33,0.0,1.0,63.75,0.0,27,2,13,0
+timm_resnet,TIMM ResNet50 Classifier,40.0,35.71,0.0,0.0,0.0,100.0,0.0,100.0,1.0,161.14,0.0,0,0,15,27

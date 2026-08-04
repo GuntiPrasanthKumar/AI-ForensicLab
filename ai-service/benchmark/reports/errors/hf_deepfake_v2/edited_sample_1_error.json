@@ -1,0 +1,10 @@
+{
+  "filename": "edited_sample_1.jpg",
+  "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\human\\edited\\edited_sample_1.jpg",
+  "category": "edited",
+  "ground_truth": "Human",
+  "predicted_label": "AI",
+  "predicted_ai_prob": 50.3,
+  "confidence": "Medium",
+  "reason": "False Positive: Human photo flagged as AI"
+}

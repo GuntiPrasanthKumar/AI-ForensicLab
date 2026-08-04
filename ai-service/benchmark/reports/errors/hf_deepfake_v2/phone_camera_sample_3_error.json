@@ -1,0 +1,10 @@
+{
+  "filename": "phone_camera_sample_3.jpg",
+  "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\human\\phone_camera\\phone_camera_sample_3.jpg",
+  "category": "phone_camera",
+  "ground_truth": "Human",
+  "predicted_label": "AI",
+  "predicted_ai_prob": 50.4,
+  "confidence": "Medium",
+  "reason": "False Positive: Human photo flagged as AI"
+}

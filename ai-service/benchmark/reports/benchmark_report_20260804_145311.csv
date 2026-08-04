@@ -1,0 +1,2 @@
+Model Key,Model Name,Accuracy (%),Precision (%),Recall (%),F1 Score (%),Specificity (%),FPR (%),FNR (%),ROC-AUC,Avg Time (ms),TP,FP,TN,FN
+pytorch_spectral,PyTorch Deep Spatial-Spectral Feature Engine,90.0,83.33,100.0,90.91,80.0,20.0,0.0,1.0,118.4,5,1,4,0

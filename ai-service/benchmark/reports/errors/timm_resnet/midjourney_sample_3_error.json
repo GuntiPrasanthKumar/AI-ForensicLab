@@ -1,0 +1,10 @@
+{
+  "filename": "midjourney_sample_3.png",
+  "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\midjourney\\midjourney_sample_3.png",
+  "category": "midjourney",
+  "ground_truth": "AI",
+  "predicted_label": "Human",
+  "predicted_ai_prob": 49.4,
+  "confidence": "Medium",
+  "reason": "False Negative: AI image flagged as Human"
+}

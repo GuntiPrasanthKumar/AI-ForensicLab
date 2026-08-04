@@ -1,0 +1,35 @@
+{
+  "benchmark_timestamp": "20260804_145311",
+  "models_evaluated": 1,
+  "model_results": {
+    "pytorch_spectral": {
+      "model_key": "pytorch_spectral",
+      "model_name": "PyTorch Deep Spatial-Spectral Feature Engine",
+      "total_samples": 10,
+      "confusion_matrix": {
+        "TP": 5,
+        "FP": 1,
+        "TN": 4,
+        "FN": 0
+      },
+      "metrics": {
+        "accuracy": 90.0,
+        "precision": 83.33,
+        "recall": 100.0,
+        "f1_score": 90.91,
+        "specificity": 80.0,
+        "false_positive_rate": 20.0,
+        "false_negative_rate": 0.0,
+        "roc_auc": 1.0,
+        "avg_inference_time_ms": 118.4
+      },
+      "misclassified_images": [
+        {
+          "filename": "camera_photo_4.jpg",
+          "ground_truth": "Human",
+          "predicted_ai_prob": 50.2
+        }
+      ]
+    }
+  }
+}

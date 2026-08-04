@@ -1,0 +1,10 @@
+{
+  "filename": "stable_diffusion_sample_2.png",
+  "filepath": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\\ubb38\uc11c\\PROJECTS\\ai-detector\\ai-service\\benchmark\\datasets\\ai\\stable_diffusion\\stable_diffusion_sample_2.png",
+  "category": "stable_diffusion",
+  "ground_truth": "AI",
+  "predicted_label": "Human",
+  "predicted_ai_prob": 49.4,
+  "confidence": "Medium",
+  "reason": "False Negative: AI image flagged as Human"
+}
