@@ -20,19 +20,24 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 } // 50MB max
 });
 
-const AI_SERVICE_PRIMARY = (process.env.AI_SERVICE_URL || "http://localhost:8000").replace(/\/+$/, "") + "/api";
-const AI_SERVICE_FALLBACK = "https://ai-forensiclab-2.onrender.com/api";
-
 // ─── In-Memory Deduplication Map for Concurrent Requests ────────────────────
 const inflightRequests = new Map();
 
 /**
  * Helper to execute AI Microservice request with primary & fallback service URLs.
+ * Re-creates FormData stream dynamically per attempt to prevent stream drain.
  */
-async function callAiService(endpoint, payload, isMultipart = false, timeoutMs = 60000) {
-  const urls = [AI_SERVICE_PRIMARY];
-  if (!AI_SERVICE_PRIMARY.includes("onrender.com")) {
-    urls.push(AI_SERVICE_FALLBACK);
+async function callAiService(endpoint, fileInfo = null, jsonPayload = null, timeoutMs = 60000) {
+  const defaultAiUrl = process.env.NODE_ENV === "production" 
+    ? "https://ai-forensiclab-2.onrender.com" 
+    : "http://localhost:8000";
+
+  const primaryUrl = (process.env.AI_SERVICE_URL || defaultAiUrl).replace(/\/+$/, "") + "/api";
+  const fallbackUrl = "https://ai-forensiclab-2.onrender.com/api";
+
+  const urls = [primaryUrl];
+  if (!primaryUrl.includes("onrender.com")) {
+    urls.push(fallbackUrl);
   }
 
   let lastError = null;
@@ -44,11 +49,20 @@ async function callAiService(endpoint, payload, isMultipart = false, timeoutMs =
 
     try {
       let config = { timeout: timeoutMs };
-      if (isMultipart) {
-        config.headers = payload.getHeaders();
+      let bodyData = jsonPayload;
+
+      if (fileInfo) {
+        // Create fresh FormData and fresh ReadStream per attempt to avoid stream depletion
+        const form = new FormData();
+        form.append("file", fs.createReadStream(fileInfo.path), {
+          filename: fileInfo.originalname,
+          contentType: fileInfo.mimetype,
+        });
+        config.headers = form.getHeaders();
+        bodyData = form;
       }
 
-      const response = await axios.post(fullUrl, payload, config);
+      const response = await axios.post(fullUrl, bodyData, config);
       if (response.data && !response.data.error) {
         return response.data;
       }
@@ -88,13 +102,13 @@ router.post("/detect", authMiddleware, upload.single("file"), async (req, res) =
 
     const timeoutMs = isVideo ? 120000 : 60000;
 
-    const form = new FormData();
-    form.append("file", fs.createReadStream(tempPath), {
-      filename: req.file.originalname,
-      contentType: req.file.mimetype,
-    });
+    const fileInfo = {
+      path: tempPath,
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+    };
 
-    const aiData = await callAiService(endpoint, form, true, timeoutMs);
+    const aiData = await callAiService(endpoint, fileInfo, null, timeoutMs);
 
     // Persist result to MongoDB safely
     let saved = null;
@@ -167,7 +181,7 @@ router.post("/detect-text", authMiddleware, async (req, res) => {
     }
 
     const requestPromise = (async () => {
-      const aiData = await callAiService("detect-text", { text: textSample }, false, 45000);
+      const aiData = await callAiService("detect-text", null, { text: textSample }, 45000);
 
       let saved = null;
       try {
