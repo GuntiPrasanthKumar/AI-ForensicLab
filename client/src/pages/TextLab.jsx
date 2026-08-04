@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import { FileText, AlertCircle } from "lucide-react";
+import { FileText, AlertCircle, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ResultDisplay from "../components/ResultDisplay";
 import TextInput from "../components/TextInput";
@@ -13,18 +13,39 @@ const TextLab = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
+  const abortControllerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
   const handleAnalyze = async () => {
-    if (!text || text.split(" ").length < 5) {
-      setError("Please enter at least 5 words.");
+    if (!text || text.split(" ").filter(Boolean).length < 5) {
+      setError("Please enter at least 5 words for accurate linguistic analysis.");
       return;
     }
+
+    // Cancel any inflight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
 
     setLoading(true);
     setError("");
     setResult(null);
 
     try {
-      const res = await axios.post(`${API_BASE}/detect-text`, { text });
+      const res = await axios.post(
+        `${API_BASE}/detect-text`, 
+        { text },
+        { signal: abortControllerRef.current.signal }
+      );
+
       setResult({
         aiProbability: 0,
         humanProbability: 0,
@@ -34,7 +55,13 @@ const TextLab = () => {
         ...res.data
       });
     } catch (err) {
-      setError(err.response?.data?.message || "Analysis failed.");
+      if (axios.isCancel(err) || err.name === "CanceledError") {
+        console.log("[TextLab] Request aborted by user/new request.");
+        return;
+      }
+      console.error("[TextLab] Analysis Error:", err);
+      const userMsg = err.response?.data?.message || "Linguistic service temporarily busy. Please retry shortly.";
+      setError(userMsg);
     } finally {
       setLoading(false);
     }
@@ -58,33 +85,49 @@ const TextLab = () => {
             <div className="flex items-center gap-2 mb-4">
               <span className="text-xs text-gray-400">Load sample:</span>
               <button 
+                disabled={loading}
                 onClick={() => { setText(sampleAiText); setError(""); }} 
-                className="text-xs px-3 py-1 bg-purple-500/10 text-purple-300 rounded-full border border-purple-500/20 hover:bg-purple-500/20 transition-all cursor-pointer"
+                className="text-xs px-3 py-1 bg-purple-500/10 text-purple-300 rounded-full border border-purple-500/20 hover:bg-purple-500/20 transition-all cursor-pointer disabled:opacity-50"
               >
                 AI Prompt Sample
               </button>
               <button 
+                disabled={loading}
                 onClick={() => { setText(sampleHumanText); setError(""); }} 
-                className="text-xs px-3 py-1 bg-blue-500/10 text-blue-300 rounded-full border border-blue-500/20 hover:bg-blue-500/20 transition-all cursor-pointer"
+                className="text-xs px-3 py-1 bg-blue-500/10 text-blue-300 rounded-full border border-blue-500/20 hover:bg-blue-500/20 transition-all cursor-pointer disabled:opacity-50"
               >
                 Human Sample
               </button>
             </div>
+            
             <TextInput text={text} setText={setText} onAnalyze={handleAnalyze} loading={loading} />
             
             <div className="flex gap-4 mt-6">
               <button 
-                onClick={() => { setText(""); setResult(null); }}
-                className="flex-1 py-4 bg-white/5 text-gray-400 font-medium rounded-2xl hover:bg-white/10 transition-all"
+                disabled={loading}
+                onClick={() => {
+                  if (abortControllerRef.current) abortControllerRef.current.abort();
+                  setText("");
+                  setResult(null);
+                  setError("");
+                }}
+                className="flex-1 py-4 bg-white/5 text-gray-400 font-medium rounded-2xl hover:bg-white/10 transition-all disabled:opacity-50 cursor-pointer"
               >
                 Clear
               </button>
               <button 
                 onClick={handleAnalyze}
-                disabled={loading || !text}
-                className="flex-[2] py-4 bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-bold rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-500/20"
+                disabled={loading || !text.trim()}
+                className="flex-[2] py-4 bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-bold rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 cursor-pointer transition-all"
               >
-                {loading ? `Analyzing Linguistics...` : `Analyze Text`}
+                {loading ? (
+                  <>
+                    <RefreshCw className="animate-spin" size={18} />
+                    Analyzing Linguistics...
+                  </>
+                ) : (
+                  "Analyze Text"
+                )}
               </button>
             </div>
 
@@ -94,7 +137,7 @@ const TextLab = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400"
               >
-                <AlertCircle size={20} />
+                <AlertCircle size={20} className="shrink-0" />
                 <p className="text-sm">{error}</p>
               </motion.div>
             )}

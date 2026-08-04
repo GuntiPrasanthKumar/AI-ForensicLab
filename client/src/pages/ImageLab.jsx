@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import { Upload, Image as ImageIcon, AlertCircle } from "lucide-react";
+import { ImageIcon, AlertCircle, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ResultDisplay from "../components/ResultDisplay";
 
@@ -13,19 +13,36 @@ const ImageLab = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
+  const abortControllerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
+    const selectedFile = e.target.files?.[0];
     if (selectedFile && selectedFile.type.startsWith("image/")) {
       setFile(selectedFile);
       const reader = new FileReader();
       reader.onloadend = () => setPreview(reader.result);
       reader.readAsDataURL(selectedFile);
       setResult(null);
+      setError("");
     }
   };
 
   const handleAnalyze = async () => {
-    if (!file) return;
+    if (!file || loading) return;
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
     setLoading(true);
     setError("");
     setResult(null);
@@ -33,7 +50,13 @@ const ImageLab = () => {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await axios.post(`${API_BASE}/detect`, formData);
+
+      const res = await axios.post(
+        `${API_BASE}/detect`, 
+        formData,
+        { signal: abortControllerRef.current.signal }
+      );
+
       setResult({
         aiProbability: 0,
         humanProbability: 0,
@@ -43,7 +66,12 @@ const ImageLab = () => {
         ...res.data
       });
     } catch (err) {
-      setError(err.response?.data?.message || "Analysis failed.");
+      if (axios.isCancel(err) || err.name === "CanceledError") {
+        console.log("[ImageLab] Request aborted.");
+        return;
+      }
+      console.error("[ImageLab] Error:", err);
+      setError(err.response?.data?.message || "Image forensic scan failed. Please try another file.");
     } finally {
       setLoading(false);
     }
@@ -51,6 +79,7 @@ const ImageLab = () => {
 
   const handleDrop = (e) => {
     e.preventDefault();
+    if (loading) return;
     const droppedFile = e.dataTransfer?.files?.[0];
     if (droppedFile && droppedFile.type.startsWith("image/")) {
       setFile(droppedFile);
@@ -58,6 +87,7 @@ const ImageLab = () => {
       reader.onloadend = () => setPreview(reader.result);
       reader.readAsDataURL(droppedFile);
       setResult(null);
+      setError("");
     }
   };
 
@@ -106,9 +136,10 @@ const ImageLab = () => {
               <input 
                 type="file" 
                 accept="image/*"
+                disabled={loading}
                 onChange={handleFileChange}
                 aria-label="Upload Image File"
-                className="absolute inset-0 opacity-0 cursor-pointer"
+                className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
                 title=""
               />
             </div>
@@ -117,17 +148,31 @@ const ImageLab = () => {
             
             <div className="flex gap-4 mt-6">
               <button 
-                onClick={() => { setFile(null); setPreview(null); setResult(null); }}
-                className="flex-1 py-4 bg-white/5 text-gray-400 font-medium rounded-2xl hover:bg-white/10 transition-all"
+                disabled={loading}
+                onClick={() => {
+                  if (abortControllerRef.current) abortControllerRef.current.abort();
+                  setFile(null);
+                  setPreview(null);
+                  setResult(null);
+                  setError("");
+                }}
+                className="flex-1 py-4 bg-white/5 text-gray-400 font-medium rounded-2xl hover:bg-white/10 transition-all disabled:opacity-50 cursor-pointer"
               >
                 Clear
               </button>
               <button 
                 onClick={handleAnalyze}
                 disabled={loading || !file}
-                className="flex-[2] py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20"
+                className="flex-[2] py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 cursor-pointer transition-all"
               >
-                {loading ? `Scanning Pixels...` : `Run Forensics`}
+                {loading ? (
+                  <>
+                    <RefreshCw className="animate-spin" size={18} />
+                    Scanning Pixels...
+                  </>
+                ) : (
+                  "Run Forensics"
+                )}
               </button>
             </div>
 
@@ -137,7 +182,7 @@ const ImageLab = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400"
               >
-                <AlertCircle size={20} />
+                <AlertCircle size={20} className="shrink-0" />
                 <p className="text-sm">{error}</p>
               </motion.div>
             )}

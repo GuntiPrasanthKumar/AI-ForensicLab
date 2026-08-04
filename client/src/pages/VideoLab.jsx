@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import { Video, AlertCircle } from "lucide-react";
+import { Video, AlertCircle, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ResultDisplay from "../components/ResultDisplay";
 
@@ -13,18 +13,35 @@ const VideoLab = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
+  const abortControllerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
+    const selectedFile = e.target.files?.[0];
     if (selectedFile && selectedFile.type.startsWith("video/")) {
       setFile(selectedFile);
       const videoUrl = URL.createObjectURL(selectedFile);
       setPreview(videoUrl);
       setResult(null);
+      setError("");
     }
   };
 
   const handleAnalyze = async () => {
-    if (!file) return;
+    if (!file || loading) return;
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
     setLoading(true);
     setError("");
     setResult(null);
@@ -32,7 +49,13 @@ const VideoLab = () => {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await axios.post(`${API_BASE}/detect`, formData);
+
+      const res = await axios.post(
+        `${API_BASE}/detect`, 
+        formData,
+        { signal: abortControllerRef.current.signal }
+      );
+
       setResult({
         aiProbability: 0,
         humanProbability: 0,
@@ -42,7 +65,12 @@ const VideoLab = () => {
         ...res.data
       });
     } catch (err) {
-      setError(err.response?.data?.message || "Analysis failed.");
+      if (axios.isCancel(err) || err.name === "CanceledError") {
+        console.log("[VideoLab] Request aborted.");
+        return;
+      }
+      console.error("[VideoLab] Error:", err);
+      setError(err.response?.data?.message || "Deepfake video scan failed. Please try another file.");
     } finally {
       setLoading(false);
     }
@@ -50,11 +78,13 @@ const VideoLab = () => {
 
   const handleDrop = (e) => {
     e.preventDefault();
+    if (loading) return;
     const droppedFile = e.dataTransfer?.files?.[0];
     if (droppedFile && droppedFile.type.startsWith("video/")) {
       setFile(droppedFile);
       setPreview(URL.createObjectURL(droppedFile));
       setResult(null);
+      setError("");
     }
   };
 
@@ -103,9 +133,10 @@ const VideoLab = () => {
               <input 
                 type="file" 
                 accept="video/*"
+                disabled={loading}
                 onChange={handleFileChange}
                 aria-label="Upload Video File"
-                className="absolute inset-0 opacity-0 cursor-pointer"
+                className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
                 title=""
               />
             </div>
@@ -114,17 +145,31 @@ const VideoLab = () => {
             
             <div className="flex gap-4 mt-6">
               <button 
-                onClick={() => { setFile(null); setPreview(null); setResult(null); }}
-                className="flex-1 py-4 bg-white/5 text-gray-400 font-medium rounded-2xl hover:bg-white/10 transition-all"
+                disabled={loading}
+                onClick={() => {
+                  if (abortControllerRef.current) abortControllerRef.current.abort();
+                  setFile(null);
+                  setPreview(null);
+                  setResult(null);
+                  setError("");
+                }}
+                className="flex-1 py-4 bg-white/5 text-gray-400 font-medium rounded-2xl hover:bg-white/10 transition-all disabled:opacity-50 cursor-pointer"
               >
                 Clear
               </button>
               <button 
                 onClick={handleAnalyze}
                 disabled={loading || !file}
-                className="flex-[2] py-4 bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-red-500/20"
+                className="flex-[2] py-4 bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-red-500/20 flex items-center justify-center gap-2 cursor-pointer transition-all"
               >
-                {loading ? `Extracting Frames...` : `Run Deepfake Scan`}
+                {loading ? (
+                  <>
+                    <RefreshCw className="animate-spin" size={18} />
+                    Extracting Frames...
+                  </>
+                ) : (
+                  "Run Deepfake Scan"
+                )}
               </button>
             </div>
 
@@ -134,7 +179,7 @@ const VideoLab = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400"
               >
-                <AlertCircle size={20} />
+                <AlertCircle size={20} className="shrink-0" />
                 <p className="text-sm">{error}</p>
               </motion.div>
             )}

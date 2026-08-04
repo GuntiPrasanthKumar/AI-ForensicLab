@@ -1,9 +1,13 @@
 import { motion } from "framer-motion";
-import { TrendingUp, BrainCircuit, CheckCircle2 } from "lucide-react";
+import { TrendingUp, BrainCircuit, CheckCircle2, Cpu, Zap, ShieldCheck } from "lucide-react";
 import Charts from "./Charts";
 
 const ResultDisplay = ({ result }) => {
   if (!result) return null;
+
+  const providerName = result.provider_used || result.providerUsed || "AI Forensic Engine";
+  const isCached = Boolean(result.is_cached || result.isCached);
+  const engineStatus = result.engine_status || result.engineStatus;
 
   return (
     <motion.div 
@@ -12,6 +16,23 @@ const ResultDisplay = ({ result }) => {
       exit={{ opacity: 0, x: -20 }}
       className="space-y-6 w-full"
     >
+      {/* System Metadata Bar */}
+      <div className="flex flex-wrap gap-2 items-center">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-300 border border-blue-500/20">
+          <Cpu size={12} /> {providerName}
+        </span>
+        {isCached && (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+            <Zap size={12} /> Cached Result
+          </span>
+        )}
+        {engineStatus && (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/20">
+            <ShieldCheck size={12} /> {engineStatus}
+          </span>
+        )}
+      </div>
+
       {/* Main Probability Card */}
       <div className="glass-card p-8 rounded-3xl relative overflow-hidden">
         <div className={`absolute top-0 right-0 w-24 h-24 blur-3xl opacity-20 ${result.aiProbability > 50 || result.morphProbability > 50 ? 'bg-red-500' : 'bg-green-500'}`} />
