@@ -345,7 +345,13 @@ router.post("/forgot-password", authLimiter, async (req, res) => {
     }
 
     const cleanEmail = String(email).toLowerCase().trim();
-    const user = await User.findOne({ email: cleanEmail });
+    let user;
+    try {
+      user = await User.findOne({ email: cleanEmail });
+    } catch (findErr) {
+      console.error("[AUTH] Forgot password findOne error:", findErr.stack || findErr.message);
+      return res.status(500).json({ message: "Database query error: " + findErr.message });
+    }
     
     // Always return success to prevent email enumeration
     if (!user) {
@@ -361,7 +367,13 @@ router.post("/forgot-password", authLimiter, async (req, res) => {
 
     const otp = generateOtp();
     setResetOtpFields(user, otp);
-    await user.save();
+    
+    try {
+      await user.save();
+    } catch (saveErr) {
+      console.error("[AUTH] Forgot password user.save() error:", saveErr.stack || saveErr.message);
+      return res.status(500).json({ message: "Database save error: " + saveErr.message });
+    }
 
     try {
       await sendResetOtpEmail(user, otp);
@@ -382,7 +394,7 @@ router.post("/forgot-password", authLimiter, async (req, res) => {
     res.json({ message: "If an account with that email exists, a reset code has been sent.", sent: true });
   } catch (err) {
     console.error("[AUTH] FORGOT PASSWORD ERROR Stack:", err.stack || err);
-    res.status(500).json({ message: "Server error: Unable to process reset request" });
+    res.status(500).json({ message: "Server error: " + (err.message || "Unable to process reset request") });
   }
 });
 
