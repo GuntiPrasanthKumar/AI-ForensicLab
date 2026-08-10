@@ -1,0 +1,75 @@
+{
+  "summary": {
+    "run_id": "run_20260808_222229_hf_vit_deepfake",
+    "timestamp": "2026-08-08T16:52:29.439600+00:00",
+    "model_key": "hf_vit_deepfake",
+    "model_name": "PyTorch ViT DeepFake Classifier",
+    "total_selected": 3,
+    "successful": 3,
+    "failed": 0,
+    "skipped": 0,
+    "total_duration_sec": 82.06,
+    "avg_inference_time_ms": 27347.67,
+    "filters": {
+      "limit": 3,
+      "source": null,
+      "label": null
+    }
+  },
+  "results": [
+    {
+      "id": "img_00001",
+      "path": "datasets/ai/dall_e/test_ai2.jpg",
+      "filename": "test_ai2.jpg",
+      "ground_truth": "ai",
+      "source": "dall_e",
+      "predicted_label": "human",
+      "ai_probability": 27.6,
+      "human_probability": 72.4,
+      "confidence": "Medium",
+      "risk_level": "Low Risk (Authentic Photograph)",
+      "model_name": "PyTorch ViT DeepFake Classifier (deepfake_vs_real_image_detection)",
+      "inference_time_ms": 79520,
+      "success": true,
+      "error": null,
+      "error_type": null,
+      "timestamp": "2026-08-08T16:51:07.381272+00:00"
+    },
+    {
+      "id": "img_00002",
+      "path": "datasets/ai/midjourney/test_ai1.png",
+      "filename": "test_ai1.png",
+      "ground_truth": "ai",
+      "source": "midjourney",
+      "predicted_label": "human",
+      "ai_probability": 26.1,
+      "human_probability": 73.9,
+      "confidence": "Medium",
+      "risk_level": "Low Risk (Authentic Photograph)",
+      "model_name": "PyTorch ViT DeepFake Classifier (deepfake_vs_real_image_detection)",
+      "inference_time_ms": 1621,
+      "success": true,
+      "error": null,
+      "error_type": null,
+      "timestamp": "2026-08-08T16:52:26.910663+00:00"
+    },
+    {
+      "id": "img_00003",
+      "path": "datasets/human/phone_camera/test_human.jpg",
+      "filename": "test_human.jpg",
+      "ground_truth": "human",
+      "source": "phone_camera",
+      "predicted_label": "human",
+      "ai_probability": 29.2,
+      "human_probability": 70.8,
+      "confidence": "Medium",
+      "risk_level": "Low Risk (Authentic Photograph)",
+      "model_name": "PyTorch ViT DeepFake Classifier (deepfake_vs_real_image_detection)",
+      "inference_time_ms": 902,
+      "success": true,
+      "error": null,
+      "error_type": null,
+      "timestamp": "2026-08-08T16:52:28.533860+00:00"
+    }
+  ]
+}

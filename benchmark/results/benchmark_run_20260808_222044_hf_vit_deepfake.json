@@ -1,0 +1,20 @@
+{
+  "summary": {
+    "run_id": "run_20260808_222044_hf_vit_deepfake",
+    "timestamp": "2026-08-08T16:50:44.492038+00:00",
+    "model_key": "hf_vit_deepfake",
+    "model_name": "PyTorch ViT DeepFake Classifier",
+    "total_selected": 0,
+    "successful": 0,
+    "failed": 0,
+    "skipped": 0,
+    "total_duration_sec": 0.0,
+    "avg_inference_time_ms": 0.0,
+    "filters": {
+      "limit": 3,
+      "source": null,
+      "label": null
+    }
+  },
+  "results": []
+}

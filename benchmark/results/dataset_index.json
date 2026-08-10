@@ -1,0 +1,77 @@
+{
+  "summary": {
+    "total_images": 3,
+    "valid_images": 3,
+    "invalid_images": 0,
+    "human_images": 1,
+    "ai_images": 2,
+    "mixed_images": 0,
+    "duplicate_images": 0,
+    "images_per_source": {
+      "dall_e": 1,
+      "midjourney": 1,
+      "phone_camera": 1
+    },
+    "images_per_category": {
+      "ai": 2,
+      "human": 1
+    },
+    "images_per_extension": {
+      "jpg": 2,
+      "png": 1
+    },
+    "invalid_reasons": {},
+    "generated_at": "2026-08-08T16:50:56.703076+00:00",
+    "dataset_root": "C:\\Users\\PRASHANT KUMAR\\OneDrive\\문서\\PROJECTS\\ai-detector\\benchmark\\datasets"
+  },
+  "images": [
+    {
+      "id": "img_00001",
+      "path": "datasets/ai/dall_e/test_ai2.jpg",
+      "filename": "test_ai2.jpg",
+      "label": "ai",
+      "source": "dall_e",
+      "extension": "jpg",
+      "size_bytes": 1653,
+      "width": 256,
+      "height": 256,
+      "mode": "RGB",
+      "valid": true,
+      "invalid_reason": null,
+      "duplicate": false,
+      "hash": "9da1483008726edcfef408f666e197030bfc546dbed58d3b28931fe67e969f35"
+    },
+    {
+      "id": "img_00002",
+      "path": "datasets/ai/midjourney/test_ai1.png",
+      "filename": "test_ai1.png",
+      "label": "ai",
+      "source": "midjourney",
+      "extension": "png",
+      "size_bytes": 1878,
+      "width": 512,
+      "height": 512,
+      "mode": "RGB",
+      "valid": true,
+      "invalid_reason": null,
+      "duplicate": false,
+      "hash": "e872116d297882570c9f29a55920eee22a6b386866b03bf971084fba081f8b22"
+    },
+    {
+      "id": "img_00003",
+      "path": "datasets/human/phone_camera/test_human.jpg",
+      "filename": "test_human.jpg",
+      "label": "human",
+      "source": "phone_camera",
+      "extension": "jpg",
+      "size_bytes": 3129,
+      "width": 400,
+      "height": 400,
+      "mode": "RGB",
+      "valid": true,
+      "invalid_reason": null,
+      "duplicate": false,
+      "hash": "4b923225bac066609f03ac3ee34248588e5e6c404f24f1c20f6cbed99eda002a"
+    }
+  ]
+}

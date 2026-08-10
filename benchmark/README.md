@@ -1,47 +1,53 @@
-# AI Forensic Lab - Benchmark & Validation Laboratory
+# AI Forensic Lab — Benchmark & Validation Framework
 
-This directory contains the Benchmark and Validation infrastructure for measuring, evaluating, and comparing computer vision and forensic models across standard dataset taxonomies.
+This directory contains the structured Benchmark and Validation framework for evaluating, measuring, and testing computer vision, NLP, and multimodal forensic AI models against standard dataset taxonomies.
 
 ---
 
-## Directory Taxonomy & Structure
+## Folder Taxonomy & Structure
 
 ```
 benchmark/
 │
-├── datasets/                 <-- Evaluation Image Datasets
-│   ├── human/                <-- Authentic Human Photography
-│   │   ├── phone_camera/     <-- Smartphone photos (iPhone, Samsung, Pixel)
-│   │   ├── dslr/             <-- Professional DSLR/Mirrorless camera captures
-│   │   ├── screenshots/      <-- Digital screen captures & crops
-│   │   ├── edited/           <-- Photos edited via Lightroom/Photoshop
-│   │   └── social_media/     <-- Compressed uploads (WhatsApp, Twitter, Instagram)
+├── datasets/                 <-- Evaluation Datasets Storage
+│   ├── human/                <-- Authentic Human-Generated Content
+│   │   ├── phone_camera/     <-- Photos captured via mobile device cameras (iOS / Android)
+│   │   ├── dslr/             <-- Photos captured via digital single-lens reflex / mirrorless cameras
+│   │   ├── screenshots/      <-- Uncompressed screen captures and digital crops
+│   │   ├── edited/           <-- Authentic photos processed through post-processing software
+│   │   └── social_media/     <-- Compressed uploads retrieved from social messaging & web platforms
 │   │
-│   ├── ai/                   <-- Synthetic & AI-Generated Imagery
-│   │   ├── chatgpt/          <-- DALL-E 3 images generated via ChatGPT
-│   │   ├── gemini/           <-- Imagen 3 images generated via Gemini
-│   │   ├── dall_e/           <-- DALL-E API generated images
-│   │   ├── midjourney/       <-- Midjourney v5/v6 renders
-│   │   ├── flux/             <-- Black Forest Labs FLUX.1 models
-│   │   ├── stable_diffusion/ <-- Stable Diffusion 1.5 / 2.1
+│   ├── ai/                   <-- Synthetic & AI-Generated Imagery & Media
+│   │   ├── chatgpt/          <-- DALL-E 3 imagery generated via OpenAI ChatGPT
+│   │   ├── gemini/           <-- Imagen 3 imagery generated via Google Gemini
+│   │   ├── dall_e/           <-- Direct DALL-E API outputs
+│   │   ├── midjourney/       <-- Midjourney v5/v6 synthetic renders
+│   │   ├── flux/             <-- Black Forest Labs FLUX.1 model outputs
+│   │   ├── stable_diffusion/ <-- Stable Diffusion 1.5 / 2.1 outputs
 │   │   ├── sdxl/             <-- Stable Diffusion XL renders
-│   │   ├── ideogram/         <-- Ideogram AI renders
-│   │   └── leonardo/         <-- Leonardo.Ai renders
+│   │   ├── ideogram/         <-- Ideogram AI typography and graphics
+│   │   └── leonardo/         <-- Leonardo.Ai synthetic renders
 │   │
-│   └── mixed/                <-- Multi-source evaluation batches
+│   └── mixed/                <-- Heterogeneous evaluation batches combining human & AI media
 │
 ├── reports/                  <-- Exported evaluation reports (JSON, CSV, PDF, Markdown)
-├── metrics/                  <-- Statistical metric calculation algorithms (Accuracy, Precision, F1, ROC-AUC)
-├── scripts/                  <-- Dataset creation & automated runner scripts
-├── results/                  <-- Model execution logs & evaluation runs
+├── metrics/                  <-- Statistical metric calculation models (Accuracy, F1, ROC-AUC)
+├── scripts/                  <-- Automated benchmark runners & dataset preparation utilities
+├── results/                  <-- Raw benchmark execution logs & model output predictions
 ├── configs/                  <-- Model benchmark configurations & evaluation parameters
-└── README.md                 <-- Benchmark documentation
+└── README.md                 <-- Framework documentation & usage guidelines
 ```
 
 ---
 
-## Usage Guidelines
+## Directory Purpose & Guidelines
 
-- **Datasets:** Store sample images under their respective human or AI generator sub-category.
-- **Configs:** Define confidence thresholds, model selection lists, and output directories in `configs/`.
-- **Reports:** Benchmark runs generate exported performance reports in `reports/` along with misclassification diagnostic logs.
+- **`datasets/`**: Isolated storage for benchmark evaluation datasets.
+  - **`datasets/human/`**: Categorized authentic media across capture devices and processing workflows.
+  - **`datasets/ai/`**: Categorized synthetic media across specific generative models and engines.
+  - **`datasets/mixed/`**: Blended test sets for stress-testing model classification accuracy.
+- **`reports/`**: Destination directory for generated performance summaries and diagnostic reports.
+- **`metrics/`**: Evaluation metric definitions and scoring formulas.
+- **`scripts/`**: Automation scripts for executing benchmarks and managing datasets.
+- **`results/`**: Execution outputs, raw prediction arrays, and run timestamps.
+- **`configs/`**: Parameter definitions, confidence thresholds, and model evaluation settings.
