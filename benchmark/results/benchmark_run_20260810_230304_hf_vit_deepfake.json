@@ -1,15 +1,15 @@
 {
   "summary": {
-    "run_id": "run_20260810_230435_hf_vit_deepfake",
-    "timestamp": "2026-08-10T17:34:35.054896+00:00",
+    "run_id": "run_20260810_230304_hf_vit_deepfake",
+    "timestamp": "2026-08-10T17:33:04.257062+00:00",
     "model_key": "hf_vit_deepfake",
     "model_name": "PyTorch ViT DeepFake Classifier",
     "total_selected": 3,
     "successful": 3,
     "failed": 0,
     "skipped": 0,
-    "total_duration_sec": 14.78,
-    "avg_inference_time_ms": 4922.67,
+    "total_duration_sec": 18.03,
+    "avg_inference_time_ms": 6006.0,
     "filters": {
       "limit": 3,
       "source": null,
@@ -29,11 +29,11 @@
       "confidence": "Medium",
       "risk_level": "Low Risk (Authentic Photograph)",
       "model_name": "PyTorch ViT DeepFake Classifier (deepfake_vs_real_image_detection)",
-      "inference_time_ms": 13307,
+      "inference_time_ms": 16094,
       "success": true,
       "error": null,
       "error_type": null,
-      "timestamp": "2026-08-10T17:34:20.278513+00:00"
+      "timestamp": "2026-08-10T17:32:46.229081+00:00"
     },
     {
       "id": "img_00002",
@@ -47,11 +47,11 @@
       "confidence": "Medium",
       "risk_level": "Low Risk (Authentic Photograph)",
       "model_name": "PyTorch ViT DeepFake Classifier (deepfake_vs_real_image_detection)",
-      "inference_time_ms": 762,
+      "inference_time_ms": 814,
       "success": true,
       "error": null,
       "error_type": null,
-      "timestamp": "2026-08-10T17:34:33.589987+00:00"
+      "timestamp": "2026-08-10T17:33:02.326022+00:00"
     },
     {
       "id": "img_00003",
@@ -65,11 +65,11 @@
       "confidence": "Medium",
       "risk_level": "Low Risk (Authentic Photograph)",
       "model_name": "PyTorch ViT DeepFake Classifier (deepfake_vs_real_image_detection)",
-      "inference_time_ms": 699,
+      "inference_time_ms": 1110,
       "success": true,
       "error": null,
       "error_type": null,
-      "timestamp": "2026-08-10T17:34:34.353392+00:00"
+      "timestamp": "2026-08-10T17:33:03.141273+00:00"
     }
   ]
 }

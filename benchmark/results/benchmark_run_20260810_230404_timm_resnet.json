@@ -1,0 +1,75 @@
+{
+  "summary": {
+    "run_id": "run_20260810_230404_timm_resnet",
+    "timestamp": "2026-08-10T17:34:04.456474+00:00",
+    "model_key": "timm_resnet",
+    "model_name": "TIMM ResNet50 Classifier",
+    "total_selected": 3,
+    "successful": 3,
+    "failed": 0,
+    "skipped": 0,
+    "total_duration_sec": 1.84,
+    "avg_inference_time_ms": 611.67,
+    "filters": {
+      "limit": 3,
+      "source": null,
+      "label": null
+    }
+  },
+  "results": [
+    {
+      "id": "img_00001",
+      "path": "datasets/ai/dall_e/test_ai2.jpg",
+      "filename": "test_ai2.jpg",
+      "ground_truth": "ai",
+      "source": "dall_e",
+      "predicted_label": "human",
+      "ai_probability": 42.4,
+      "human_probability": 57.6,
+      "confidence": "High",
+      "risk_level": "Medium Risk (Potentially Manipulated)",
+      "model_name": "TIMM ResNet50 Classifier",
+      "inference_time_ms": 1563,
+      "success": true,
+      "error": null,
+      "error_type": null,
+      "timestamp": "2026-08-10T17:34:02.617470+00:00"
+    },
+    {
+      "id": "img_00002",
+      "path": "datasets/ai/midjourney/test_ai1.png",
+      "filename": "test_ai1.png",
+      "ground_truth": "ai",
+      "source": "midjourney",
+      "predicted_label": "human",
+      "ai_probability": 42.5,
+      "human_probability": 57.5,
+      "confidence": "High",
+      "risk_level": "Medium Risk (Potentially Manipulated)",
+      "model_name": "TIMM ResNet50 Classifier",
+      "inference_time_ms": 148,
+      "success": true,
+      "error": null,
+      "error_type": null,
+      "timestamp": "2026-08-10T17:34:04.182102+00:00"
+    },
+    {
+      "id": "img_00003",
+      "path": "datasets/human/phone_camera/test_human.jpg",
+      "filename": "test_human.jpg",
+      "ground_truth": "human",
+      "source": "phone_camera",
+      "predicted_label": "human",
+      "ai_probability": 42.1,
+      "human_probability": 57.9,
+      "confidence": "High",
+      "risk_level": "Medium Risk (Potentially Manipulated)",
+      "model_name": "TIMM ResNet50 Classifier",
+      "inference_time_ms": 124,
+      "success": true,
+      "error": null,
+      "error_type": null,
+      "timestamp": "2026-08-10T17:34:04.331207+00:00"
+    }
+  ]
+}

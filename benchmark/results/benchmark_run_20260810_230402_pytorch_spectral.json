@@ -1,0 +1,75 @@
+{
+  "summary": {
+    "run_id": "run_20260810_230402_pytorch_spectral",
+    "timestamp": "2026-08-10T17:34:02.611755+00:00",
+    "model_key": "pytorch_spectral",
+    "model_name": "PyTorch Deep Spatial-Spectral Feature Engine",
+    "total_selected": 3,
+    "successful": 3,
+    "failed": 0,
+    "skipped": 0,
+    "total_duration_sec": 0.19,
+    "avg_inference_time_ms": 62.33,
+    "filters": {
+      "limit": 3,
+      "source": null,
+      "label": null
+    }
+  },
+  "results": [
+    {
+      "id": "img_00001",
+      "path": "datasets/ai/dall_e/test_ai2.jpg",
+      "filename": "test_ai2.jpg",
+      "ground_truth": "ai",
+      "source": "dall_e",
+      "predicted_label": "human",
+      "ai_probability": 49.8,
+      "human_probability": 50.2,
+      "confidence": "High",
+      "risk_level": "Medium Risk (Potentially Manipulated)",
+      "model_name": "PyTorch Deep Spatial-Spectral Feature Engine",
+      "inference_time_ms": 38,
+      "success": true,
+      "error": null,
+      "error_type": null,
+      "timestamp": "2026-08-10T17:34:02.421347+00:00"
+    },
+    {
+      "id": "img_00002",
+      "path": "datasets/ai/midjourney/test_ai1.png",
+      "filename": "test_ai1.png",
+      "ground_truth": "ai",
+      "source": "midjourney",
+      "predicted_label": "ai",
+      "ai_probability": 50.7,
+      "human_probability": 49.3,
+      "confidence": "High",
+      "risk_level": "Medium Risk (Potentially Manipulated)",
+      "model_name": "PyTorch Deep Spatial-Spectral Feature Engine",
+      "inference_time_ms": 98,
+      "success": true,
+      "error": null,
+      "error_type": null,
+      "timestamp": "2026-08-10T17:34:02.460565+00:00"
+    },
+    {
+      "id": "img_00003",
+      "path": "datasets/human/phone_camera/test_human.jpg",
+      "filename": "test_human.jpg",
+      "ground_truth": "human",
+      "source": "phone_camera",
+      "predicted_label": "human",
+      "ai_probability": 48.3,
+      "human_probability": 51.7,
+      "confidence": "High",
+      "risk_level": "Medium Risk (Potentially Manipulated)",
+      "model_name": "PyTorch Deep Spatial-Spectral Feature Engine",
+      "inference_time_ms": 51,
+      "success": true,
+      "error": null,
+      "error_type": null,
+      "timestamp": "2026-08-10T17:34:02.559888+00:00"
+    }
+  ]
+}
