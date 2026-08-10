@@ -1,3 +1,7 @@
+/**
+ * VideoLab Page Component
+ * Provides video deepfake detection and frame analysis interface.
+ */
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { Video, AlertCircle, RefreshCw } from "lucide-react";
