@@ -1,0 +1,305 @@
+{
+  "summary_metadata": {
+    "run_id": "run_20260808_222229_hf_vit_deepfake",
+    "timestamp": "2026-08-08T16:52:29.439600+00:00",
+    "model_key": "hf_vit_deepfake",
+    "model_name": "PyTorch ViT DeepFake Classifier",
+    "total_evaluated": 3
+  },
+  "confusion_matrix": {
+    "raw": {
+      "true_negative": 1,
+      "false_positive": 0,
+      "false_negative": 2,
+      "true_positive": 0
+    },
+    "normalized": {
+      "human_actual": {
+        "predicted_human": 1.0,
+        "predicted_ai": 0.0
+      },
+      "ai_actual": {
+        "predicted_human": 1.0,
+        "predicted_ai": 0.0
+      }
+    }
+  },
+  "error_analysis": {
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 1.0,
+    "total_false_positives": 0,
+    "total_false_negatives": 2,
+    "false_positives": [],
+    "false_negatives": [
+      {
+        "id": "img_00001",
+        "path": "datasets/ai/dall_e/test_ai2.jpg",
+        "filename": "test_ai2.jpg",
+        "ground_truth": "ai",
+        "predicted_label": "human",
+        "ai_probability": 27.6,
+        "confidence": "Medium",
+        "source": "dall_e"
+      },
+      {
+        "id": "img_00002",
+        "path": "datasets/ai/midjourney/test_ai1.png",
+        "filename": "test_ai1.png",
+        "ground_truth": "ai",
+        "predicted_label": "human",
+        "ai_probability": 26.1,
+        "confidence": "Medium",
+        "source": "midjourney"
+      }
+    ]
+  },
+  "confidence_analysis": {
+    "avg_confidence_correct": 29.2,
+    "avg_confidence_incorrect": 26.85,
+    "avg_ai_prob_false_positives": 0.0,
+    "avg_ai_prob_false_negatives": 26.85,
+    "error_confidence_breakdown": {
+      "threshold_boundary_errors": 0,
+      "high_confidence_errors": 0,
+      "low_confidence_errors": 2
+    },
+    "confidence_tiers": {
+      "Medium": {
+        "total_count": 3,
+        "correct_count": 1,
+        "accuracy": 0.3333,
+        "avg_ai_probability": 27.63
+      }
+    }
+  },
+  "dataset_balance": {
+    "human_count": 1,
+    "ai_count": 2,
+    "total_count": 3,
+    "human_percentage": 33.3333,
+    "ai_percentage": 66.6667,
+    "is_balanced": false,
+    "balance_status": "Imbalanced",
+    "warning": "Accuracy may not represent real-world performance because the benchmark dataset is imbalanced (Human: 33.3333%, AI: 66.6667%)."
+  },
+  "source_level_analysis": {
+    "dall_e": {
+      "sample_count": 1,
+      "has_sufficient_samples": false,
+      "insufficient_sample_warning": "Insufficient sample size (1 < 3). Metrics may not be statistically significant.",
+      "accuracy": 0.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "false_positive_rate": 0.0,
+      "false_negative_rate": 1.0,
+      "avg_ai_probability": 27.6,
+      "tp": 0,
+      "fp": 0,
+      "tn": 0,
+      "fn": 1
+    },
+    "midjourney": {
+      "sample_count": 1,
+      "has_sufficient_samples": false,
+      "insufficient_sample_warning": "Insufficient sample size (1 < 3). Metrics may not be statistically significant.",
+      "accuracy": 0.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "false_positive_rate": 0.0,
+      "false_negative_rate": 1.0,
+      "avg_ai_probability": 26.1,
+      "tp": 0,
+      "fp": 0,
+      "tn": 0,
+      "fn": 1
+    },
+    "phone_camera": {
+      "sample_count": 1,
+      "has_sufficient_samples": false,
+      "insufficient_sample_warning": "Insufficient sample size (1 < 3). Metrics may not be statistically significant.",
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "false_positive_rate": 0.0,
+      "false_negative_rate": 0.0,
+      "avg_ai_probability": 29.2,
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0
+    }
+  },
+  "model_level_analysis": {
+    "models": [
+      {
+        "model_key": "hf_vit_deepfake",
+        "model_name": "PyTorch ViT DeepFake Classifier",
+        "sample_count": 3,
+        "accuracy": 0.3333,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1_score": 0.0,
+        "roc_auc": 0.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 1.0,
+        "avg_inference_time_ms": 27347.67,
+        "failure_rate": 0.0
+      }
+    ],
+    "comparison_notes": [
+      "Evaluated single primary forensic model."
+    ]
+  },
+  "error_categories": {
+    "false_positive": {
+      "count": 0,
+      "sample_ids": []
+    },
+    "false_negative": {
+      "count": 2,
+      "sample_ids": [
+        "img_00001",
+        "img_00002"
+      ]
+    },
+    "low_confidence_errors": {
+      "count": 2,
+      "sample_ids": []
+    },
+    "high_confidence_errors": {
+      "count": 0,
+      "sample_ids": []
+    },
+    "model_failure": {
+      "count": 0,
+      "sample_ids": []
+    },
+    "invalid_input": {
+      "count": 0,
+      "sample_ids": []
+    },
+    "insufficient_data": {
+      "count": 1,
+      "sample_ids": []
+    }
+  },
+  "analysis_summary": {
+    "overall_assessment": "Evaluated 3 images using model 'PyTorch ViT DeepFake Classifier'. Accuracy: 33.3%.",
+    "strengths": [
+      "Strong specificity (100.0%) in detecting authentic human photographs."
+    ],
+    "weaknesses": [
+      "Elevated false negative rate (100.0%). AI-generated images missed by detector."
+    ],
+    "warnings": [
+      "Accuracy may not represent real-world performance because the benchmark dataset is imbalanced (Human: 33.3333%, AI: 66.6667%)."
+    ],
+    "recommendations": [
+      "AI-generated images are frequently missed. Investigate false-negative cases.",
+      "Accuracy may not represent real-world performance because the benchmark dataset is imbalanced."
+    ]
+  },
+  "visualization_data": {
+    "confusion_matrix": {
+      "raw_matrix": [
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ]
+      ],
+      "normalized_matrix": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ]
+      ],
+      "labels": [
+        "Human",
+        "AI"
+      ]
+    },
+    "source_comparison": [
+      {
+        "source": "dall_e",
+        "accuracy": 0.0,
+        "fp_rate": 0.0,
+        "fn_rate": 1.0,
+        "sample_count": 1,
+        "has_sufficient_samples": false
+      },
+      {
+        "source": "midjourney",
+        "accuracy": 0.0,
+        "fp_rate": 0.0,
+        "fn_rate": 1.0,
+        "sample_count": 1,
+        "has_sufficient_samples": false
+      },
+      {
+        "source": "phone_camera",
+        "accuracy": 1.0,
+        "fp_rate": 0.0,
+        "fn_rate": 0.0,
+        "sample_count": 1,
+        "has_sufficient_samples": false
+      }
+    ],
+    "model_comparison": [
+      {
+        "model_name": "PyTorch ViT DeepFake Classifier",
+        "accuracy": 0.3333,
+        "f1_score": 0.0,
+        "roc_auc": 0.0,
+        "avg_inference_time_ms": 27347.67
+      }
+    ],
+    "error_distribution": [
+      {
+        "category": "false_positive",
+        "count": 0
+      },
+      {
+        "category": "false_negative",
+        "count": 2
+      },
+      {
+        "category": "low_confidence_errors",
+        "count": 2
+      },
+      {
+        "category": "high_confidence_errors",
+        "count": 0
+      },
+      {
+        "category": "model_failure",
+        "count": 0
+      },
+      {
+        "category": "invalid_input",
+        "count": 0
+      },
+      {
+        "category": "insufficient_data",
+        "count": 1
+      }
+    ],
+    "confidence_distribution": [
+      {
+        "tier": "Medium",
+        "accuracy": 0.3333,
+        "total_count": 3
+      }
+    ]
+  }
+}
