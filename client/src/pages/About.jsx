@@ -1,3 +1,7 @@
+/**
+ * About Page Component
+ * Displays project mission, model capabilities, and research documentation.
+ */
 import { ShieldAlert, BrainCircuit, Code, Database, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 
