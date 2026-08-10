@@ -1,15 +1,15 @@
 {
   "summary": {
-    "run_id": "run_20260810_230036_timm_resnet",
-    "timestamp": "2026-08-10T17:30:36.513489+00:00",
-    "model_key": "timm_resnet",
-    "model_name": "TIMM ResNet50 Classifier",
+    "run_id": "run_20260810_230029_pytorch_spectral",
+    "timestamp": "2026-08-10T17:30:29.873651+00:00",
+    "model_key": "pytorch_spectral",
+    "model_name": "PyTorch Deep Spatial-Spectral Feature Engine",
     "total_selected": 3,
     "successful": 3,
     "failed": 0,
     "skipped": 0,
-    "total_duration_sec": 6.63,
-    "avg_inference_time_ms": 2195.0,
+    "total_duration_sec": 0.49,
+    "avg_inference_time_ms": 162.67,
     "filters": {
       "limit": 3,
       "source": null,
@@ -24,16 +24,16 @@
       "ground_truth": "ai",
       "source": "dall_e",
       "predicted_label": "human",
-      "ai_probability": 42.4,
-      "human_probability": 57.6,
+      "ai_probability": 49.8,
+      "human_probability": 50.2,
       "confidence": "High",
       "risk_level": "Medium Risk (Potentially Manipulated)",
-      "model_name": "TIMM ResNet50 Classifier",
-      "inference_time_ms": 4985,
+      "model_name": "PyTorch Deep Spatial-Spectral Feature Engine",
+      "inference_time_ms": 83,
       "success": true,
       "error": null,
       "error_type": null,
-      "timestamp": "2026-08-10T17:30:29.888296+00:00"
+      "timestamp": "2026-08-10T17:30:29.383477+00:00"
     },
     {
       "id": "img_00002",
@@ -41,17 +41,17 @@
       "filename": "test_ai1.png",
       "ground_truth": "ai",
       "source": "midjourney",
-      "predicted_label": "human",
-      "ai_probability": 42.5,
-      "human_probability": 57.5,
+      "predicted_label": "ai",
+      "ai_probability": 50.7,
+      "human_probability": 49.3,
       "confidence": "High",
       "risk_level": "Medium Risk (Potentially Manipulated)",
-      "model_name": "TIMM ResNet50 Classifier",
-      "inference_time_ms": 766,
+      "model_name": "PyTorch Deep Spatial-Spectral Feature Engine",
+      "inference_time_ms": 263,
       "success": true,
       "error": null,
       "error_type": null,
-      "timestamp": "2026-08-10T17:30:34.907839+00:00"
+      "timestamp": "2026-08-10T17:30:29.466663+00:00"
     },
     {
       "id": "img_00003",
@@ -60,16 +60,16 @@
       "ground_truth": "human",
       "source": "phone_camera",
       "predicted_label": "human",
-      "ai_probability": 42.1,
-      "human_probability": 57.9,
+      "ai_probability": 48.3,
+      "human_probability": 51.7,
       "confidence": "High",
       "risk_level": "Medium Risk (Potentially Manipulated)",
-      "model_name": "TIMM ResNet50 Classifier",
-      "inference_time_ms": 834,
+      "model_name": "PyTorch Deep Spatial-Spectral Feature Engine",
+      "inference_time_ms": 142,
       "success": true,
       "error": null,
       "error_type": null,
-      "timestamp": "2026-08-10T17:30:35.674150+00:00"
+      "timestamp": "2026-08-10T17:30:29.731044+00:00"
     }
   ]
 }
