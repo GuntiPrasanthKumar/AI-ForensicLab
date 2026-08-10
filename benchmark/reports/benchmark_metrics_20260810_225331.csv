@@ -1,0 +1,2 @@
+model,samples,accuracy,precision,recall,f1,specificity,false_positive_rate,false_negative_rate,roc_auc,average_inference_time_ms,failure_rate
+PyTorch ViT DeepFake Classifier,3,0.3333,0.0,0.0,0.0,1.0,0.0,1.0,0.0,27347.67,0.0
