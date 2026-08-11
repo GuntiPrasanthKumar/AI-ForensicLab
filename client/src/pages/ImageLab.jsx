@@ -1,3 +1,7 @@
+/**
+ * ImageLab Page Component
+ * Handles image uploads, authenticity analysis, and forensic heatmaps.
+ */
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { ImageIcon, AlertCircle, RefreshCw } from "lucide-react";
