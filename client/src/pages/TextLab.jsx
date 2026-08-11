@@ -1,3 +1,7 @@
+/**
+ * TextLab Page Component
+ * Evaluates text samples for AI generation and perplexity indicators.
+ */
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { FileText, AlertCircle, RefreshCw } from "lucide-react";
