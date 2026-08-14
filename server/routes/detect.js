@@ -1,3 +1,7 @@
+/**
+ * Detection Routes Module
+ * Handles image, video, and text authenticity analysis requests.
+ */
 const express = require("express");
 const multer = require("multer");
 const axios = require("axios");
