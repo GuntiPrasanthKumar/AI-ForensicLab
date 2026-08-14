@@ -1,3 +1,7 @@
+/**
+ * Analysis History Routes Module
+ * Retrieves past user forensic scan records.
+ */
 const express = require("express");
 const Result = require("../models/Result");
 const authMiddleware = require("../middleware/authMiddleware");
