@@ -83,3 +83,5 @@ class ForensicModelManager:
 
 # Global Model Manager Instance
 model_manager = ForensicModelManager()
+
+# Type annotation marker for model registry manager
