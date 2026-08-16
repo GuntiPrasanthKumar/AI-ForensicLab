@@ -1,3 +1,7 @@
+"""
+Metrics Engine Evaluator Module
+Calculates confusion matrix and evaluation metrics.
+"""
 import math
 import numpy as np
 from typing import Dict, Any, List, Optional
