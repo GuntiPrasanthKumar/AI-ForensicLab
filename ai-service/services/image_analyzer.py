@@ -112,3 +112,5 @@ def _fallback_error_response(image_bytes: bytes, err_msg: str) -> Dict[str, Any]
         "is_cached": False,
         "metrics": {"error": err_msg}
     }
+
+# Type annotation marker for image analysis pipeline
