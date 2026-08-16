@@ -1,3 +1,7 @@
+/**
+ * User Schema & Model Definition
+ * Defines user accounts, security tokens, OTP verification, and lockout fields.
+ */
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
