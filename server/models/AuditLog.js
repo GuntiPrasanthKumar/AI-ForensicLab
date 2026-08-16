@@ -1,3 +1,7 @@
+/**
+ * AuditLog Schema & Model Definition
+ * Tracks security events, authentication attempts, and system actions.
+ */
 const mongoose = require("mongoose");
 
 const AuditLogSchema = new mongoose.Schema({
