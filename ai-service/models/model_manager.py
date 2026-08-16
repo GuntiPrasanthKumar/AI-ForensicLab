@@ -1,3 +1,7 @@
+"""
+Forensic Model Manager Registry
+Registers and loads vision models for image deepfake detection.
+"""
 import os
 from typing import Dict, Any, List
 from PIL import Image
