@@ -1,3 +1,7 @@
+"""
+Dataset Deduplicator Module
+Deduplicates images using content SHA-256 hashing.
+"""
 import hashlib
 from pathlib import Path
 from typing import Dict, Any, List
