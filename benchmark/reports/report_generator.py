@@ -1,3 +1,7 @@
+"""
+Report Generator Module
+Generates multi-format benchmark reports (JSON, CSV, MD, PDF).
+"""
 import csv
 import json
 import math
