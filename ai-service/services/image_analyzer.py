@@ -1,3 +1,7 @@
+"""
+Image Analyzer Module
+Main entry point for evaluating image authenticity using deep learning models.
+"""
 import os
 import time
 from typing import Dict, Any
