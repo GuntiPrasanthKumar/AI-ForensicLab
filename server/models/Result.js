@@ -1,3 +1,7 @@
+/**
+ * Result Schema & Model Definition
+ * Stores forensic image detection analysis records and metrics.
+ */
 const mongoose = require("mongoose");
 
 const ResultSchema = new mongoose.Schema({
