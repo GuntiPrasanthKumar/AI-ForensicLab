@@ -1,3 +1,7 @@
+"""
+Evaluation Analysis Engine Module
+Analyzes model errors, dataset balance, and recommendations.
+"""
 import math
 import numpy as np
 from typing import Dict, Any, List, Optional
