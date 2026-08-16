@@ -1,3 +1,7 @@
+"""
+Image Validator Module
+Validates image format headers and resolution bounds.
+"""
 import os
 from pathlib import Path
 from typing import Dict, Any
