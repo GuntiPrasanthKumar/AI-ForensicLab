@@ -1,3 +1,7 @@
+"""
+Dataset Scanner Module
+Discovers image files within directory trees.
+"""
 import os
 from pathlib import Path
 from typing import List, Dict, Any, Set
