@@ -69,3 +69,9 @@ Frontend (React + Vite) <---> Server (Express.js) <---> AI Service (PyTorch / Vi
 - `MONGO_URI`: MongoDB connection string
 - `PORT`: Server port (default: 5000)
 - `PRIMARY_IMAGE_MODEL`: Active image detection model key
+
+## Local Development Setup
+
+1. Install dependencies: `npm install` in client and server directories.
+2. Run server: `npm run dev` inside server directory.
+3. Run client: `npm run dev` inside client directory.
