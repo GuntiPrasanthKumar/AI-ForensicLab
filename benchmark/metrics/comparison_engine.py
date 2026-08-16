@@ -1,3 +1,7 @@
+"""
+Model Comparison Engine Module
+Compares vision models side-by-side with agreement metrics.
+"""
 import hashlib
 import json
 import math
