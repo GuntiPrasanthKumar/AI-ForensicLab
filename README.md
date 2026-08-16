@@ -58,3 +58,8 @@ npm run dev
 ## 🛡️ License
 
 Distributed under the MIT License. See `LICENSE` for more information.
+## System Architecture
+
+```
+Frontend (React + Vite) <---> Server (Express.js) <---> AI Service (PyTorch / ViT / TIMM)
+```
