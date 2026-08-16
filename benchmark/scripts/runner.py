@@ -1,3 +1,7 @@
+"""
+Benchmark Runner Module
+Orchestrates execution of benchmark passes.
+"""
 import os
 import sys
 import time
