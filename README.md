@@ -63,3 +63,9 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ```
 Frontend (React + Vite) <---> Server (Express.js) <---> AI Service (PyTorch / ViT / TIMM)
 ```
+
+## Environment Configuration
+
+- `MONGO_URI`: MongoDB connection string
+- `PORT`: Server port (default: 5000)
+- `PRIMARY_IMAGE_MODEL`: Active image detection model key
