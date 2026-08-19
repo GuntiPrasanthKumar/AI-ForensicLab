@@ -39,7 +39,7 @@ npm install
 npm start
 ```
 
-### 2. AI Engine Setup
+### 2. AI Engine setup
 ```bash
 cd ai-service
 pip install -r requirements.txt
